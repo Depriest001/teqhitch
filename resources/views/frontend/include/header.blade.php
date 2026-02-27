@@ -11,8 +11,12 @@
     <div class="container-fluid sticky-top">
         <div class="container">
             <nav class="navbar navbar-expand-lg navbar-dark p-0">
-                <a href="{{route('home')}}" class="navbar-brand d-flex">
-                  <img src="{{ asset('assets/img/logo.png')}}" alt="" width="50px">
+                <a href="{{route('home')}}" class="navbar-brand d-flex align-items-center justify-content-center">
+                @php
+                    $logo = $globalSetting->site_logo ?? null;
+                @endphp
+                
+                <img src="{{ $logo ? asset('storage/'.$logo) : asset('assets/img/logo.png') }}" alt="Logo" width="60px">
                   <h1 class="text-white">Teq<span class="logoText" style="color: #14183E;">h</span>itch</h1>
                 </a>
                 <button type="button" class="navbar-toggler ms-auto me-0" data-bs-toggle="collapse"

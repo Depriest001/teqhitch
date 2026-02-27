@@ -1,7 +1,11 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand pt-6">
         <a class="app-brand-link">
-            <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" width="40px">
+            @php
+                $logo = $globalSetting->site_logo ?? null;
+            @endphp
+            
+            <img src="{{ $logo ? asset('storage/'.$logo) : asset('assets/img/logo.png') }}" alt="Logo" width="50px">
             <h3 class="pt-4">Teqhitch</h3>
         </a>
 
@@ -39,6 +43,13 @@
             <a href="{{ route('user.assignment.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-task"></i>
                 <div class="text-truncate"> Assignment</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('user.searchTopics.*') ? 'active' : '' }}">
+            <a href="{{ route('user.searchTopics.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bxs-graduation"></i>
+                <div class="text-truncate">Seminar/Project</div>
             </a>
         </li>
 

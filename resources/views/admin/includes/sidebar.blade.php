@@ -1,7 +1,11 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand pt-6">
         <a class="app-brand-link">
-            <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" width="40px">
+            @php
+                $logo = $globalSetting->site_logo ?? null;
+            @endphp
+            
+            <img src="{{ $logo ? asset('storage/'.$logo) : asset('assets/img/logo.png') }}" alt="Logo" width="50px">
             <h3 class="pt-4">Teqhitch</h3>
         </a>
 
@@ -56,9 +60,23 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->routeIs('admin.topics.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.topics.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-book"></i>
+                <div class="text-truncate">Manage Topic</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.topic-payments.*') || request()->routeIs('admin.topic-payment-settings.*')? 'active' : '' }}">
+            <a href="{{ route('admin.topic-payments.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                <div class="text-truncate">Topic Payments</div>
+            </a>
+        </li>
+
         <li class="menu-item {{ request()->routeIs('admin.transaction.*') ? 'active' : '' }}">
             <a href="{{ route('admin.transaction.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-receipt"></i>
+                <i class="menu-icon tf-icons bx bx-wallet"></i>
                 <div class="text-truncate"> Transaction History</div>
             </a>
         </li>
@@ -70,8 +88,8 @@
             </a>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('admin.system.setting') ? 'active' : '' }}">
-            <a href="{{ route('admin.system.setting') }}" class="menu-link">
+        <li class="menu-item {{ request()->routeIs('admin.system.settings') ? 'active' : '' }}">
+            <a href="{{ route('admin.system.settings.edit') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-cog"></i>
                 <div class="text-truncate"> System Settings</div>
             </a>

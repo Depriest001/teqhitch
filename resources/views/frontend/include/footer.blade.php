@@ -28,15 +28,15 @@
                     <a href="{{route('home')}}" class="d-inline-block mb-3">
                         <h1 class="text-white">Teq<span class="text-global">h</span>itch</h1>
                     </a>
-                    <p class="mb-0">Teqhitch ICT Academy LTD is committed to delivering top-tier digital training, helping individuals and businesses thrive through hands-on learning, expert guidance, and real-world tech solutions.</p>
+                    <p class="mb-0">{{ $globalSetting->site_name }} is committed to delivering top-tier digital training, helping individuals and businesses thrive through hands-on learning, expert guidance, and real-world tech solutions.</p>
                 </div>
                 <div class="col-md-6 col-lg-3 wow fadeIn" data-wow-delay="0.3s">
                     <h5 class="text-white mb-4">Get In Touch</h5>
                     <p><i class="fa fa-map-marker-alt me-3"></i>
-                        {{ $footer->address }}
+                        {{ $globalSetting->address }}
                     </p>
-                    <p><i class="fa fa-phone-alt me-3"></i>{{ $footer->support_phone }}</p>
-                    <p><i class="fa fa-envelope me-3"></i>{{ $footer->support_email }}</p>
+                    <p><i class="fa fa-phone-alt me-3"></i>{{ $globalSetting->support_phone }}</p>
+                    <p><i class="fa fa-envelope me-3"></i>{{ $globalSetting->support_email }}</p>
                     <div class="d-flex pt-2">
                         <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
                         <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>

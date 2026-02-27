@@ -8,10 +8,15 @@
     <meta content="" name="keywords">
 
     @yield('extraStyle')
-    <title>@yield('title','TEQHITCH')</title>
+    <title>@yield('title','{{ $globalSetting->site_name }}')</title>
 
     <!-- Favicon -->
-    <link href="{{ asset('assets/img/favicon.jpg')}}" rel="icon">
+    @php
+      $favicon = $globalSetting->favicon ?? null;
+    @endphp
+
+    <link rel="icon"
+      href="{{ $favicon ? asset('storage/'.$favicon) : asset('assets/img/favicon.jpg') }}">
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

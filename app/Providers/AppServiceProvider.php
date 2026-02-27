@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\URL;
 use App\Models\SystemInfo;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,11 +21,14 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot()
-    {
-        // Share footer data with all views that include the footer
-        View::composer('frontend.include.footer', function ($view) {
-            $footer = SystemInfo::first();
-            $view->with('footer', $footer);
-        });
+    {        
+        $setting = SystemInfo::first(); // or however you fetch it            
+        View::share('globalSetting', $setting);
     }
+    // public function boot()
+    // {
+    //     $setting = SystemInfo::first(); // or however you fetch it            
+    //     View::share('globalSetting', $setting);
+    //     URL::forceScheme('https');
+    // }
 }

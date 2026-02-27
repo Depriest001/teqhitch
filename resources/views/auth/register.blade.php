@@ -5,11 +5,16 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>Register | {{ $globalSetting->site_name ?? 'Teqhitch' }}</title>
 
-    <title>@yield('title','Register | Teqhitch ICT Academy LTD')</title>
+    @php
+      $favicon = $globalSetting->favicon ?? null;
+    @endphp
+
+    <link rel="icon"
+      href="{{ $favicon ? asset('storage/'.$favicon) : asset('assets/img/favicon.jpg') }}">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon.jpg')}}" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

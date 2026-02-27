@@ -8,10 +8,15 @@
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
       
     @yield('extraStyle')
-    <title>@yield('title','TEQHITCH')</title>
+    <title>@yield('title','{{ $globalSetting->site_name }}')</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon.jpg')}}" />
+    @php
+      $favicon = $globalSetting->favicon ?? null;
+    @endphp
+
+    <link rel="icon"
+      href="{{ $favicon ? asset('storage/'.$favicon) : asset('assets/img/favicon.jpg') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -107,7 +112,7 @@
                         </a>
                       </li>
                       <li>
-                        <a class="dropdown-item" href="{{ route('admin.system.setting') }}">
+                        <a class="dropdown-item" href="{{ route('admin.system.settings.edit') }}">
                           <i class="icon-base bx bx-cog icon-md me-3"></i><span>Settings</span>
                         </a>
                       </li>

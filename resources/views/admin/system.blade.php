@@ -132,7 +132,7 @@
                     <h5 class="mb-0"><i class="bx bx-brush text-primary"></i> Branding & Theme</h5>
                 </div>
 
-                <form action="{{ route('admin.system.settings.branding.update') }}"
+                <form action="{{ route('admin.system.settings.branding') }}"
                     method="POST"
                     class="card-body"
                     enctype="multipart/form-data">
@@ -203,7 +203,7 @@
                 </div>
                 <div class="card-body">
 
-                    <form action="{{ route('admin.email.settings.updatemail') }}" 
+                    <form action="{{ route('admin.email.settings.update') }}" 
                         method="POST" 
                         class="row">
                         @csrf
@@ -287,7 +287,7 @@
                 <div class="card-header bg-white">
                     <h5 class="mb-0"><i class="bx bx-world text-primary"></i> About Settings</h5>
                 </div>
-                <form action="{{ route('admin.system.settings.about.update') }}"
+                <form action="{{ route('admin.system.settings.about') }}"
                     method="POST"
                     class="card-body">
                     @csrf

@@ -47,8 +47,11 @@
             </div>
         </div>
     @endif
-    <h4 class="fw-bold py-3 mb-4">My Courses</h4>
-
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold py-3 mb-4">My Courses</h4>
+        <a href="{{ route('user.courses.enroll') }}" class="btn btn-primary rounded-pill px-4"><i class="bx bx-plus-circle me-1"></i> Enroll Course</a>
+    </div>
     <div class="row g-4">
 
         @forelse ($enrollments as $enrollment)

@@ -57,13 +57,8 @@ class CourseController extends Controller
         }
 
         do {
-            $tx_ref = 'TX-' . date('Ymd') . '-' . $student->id . '-' . strtoupper(Str::random(6));
+            $tx_ref = "Tx" . Str::uuid()->getHex();
         } while (Payment::where('reference', $tx_ref)->exists());
-
-        // Get active Flutterwave gateway
-        // $gateway = PaymentGateway::where('name', 'Flutterwave')
-        //     ->where('status', 'active')
-        //     ->firstOrFail();
 
         // Retry-safe payment creation
         $payment = Payment::updateOrCreate(
@@ -81,7 +76,7 @@ class CourseController extends Controller
 
         return view('user.course.buy_course', compact('course', 'student', 'tx_ref'));
     }
-
+    
     public function callback(Request $request)
     {
         $transaction_id = $request->query('transaction_id');
@@ -197,43 +192,90 @@ class CourseController extends Controller
         return view('user.paymentfailed');
     }
 
-    public function show(Request $request, $courseId)
-    {
-        $enrollment = Enrollment::where('student_id', auth()->id())
-            ->where('course_id', $courseId)
-            ->with(['course.modules', 'moduleProgress'])
-            ->firstOrFail();
+    // public function show(Request $request, $courseId)
+    // {
+    //     $enrollment = Enrollment::where('student_id', auth()->id())
+    //         ->where('course_id', $courseId)
+    //         ->with(['course.modules', 'moduleProgress'])
+    //         ->firstOrFail();
 
-        $course = $enrollment->course;
+    //     $course = $enrollment->course;
+    //     $modules = $course->modules;
+
+    //     // Progress
+    //     $totalModules = $modules->count();
+    //     $completedModules = $enrollment->moduleProgress
+    //         ->where('status', 'completed')
+    //         ->count();
+
+    //     $progress = $totalModules > 0
+    //         ? round(($completedModules / $totalModules) * 100)
+    //         : 0;
+
+    //     // 🔥 Module selection logic
+    //     $moduleId = $request->query('module');
+
+    //     if ($moduleId && $modules->contains('id', $moduleId)) {
+    //         $currentModule = $modules->firstWhere('id', $moduleId);
+    //     } else {
+    //         // Resume in-progress module OR first module
+    //         $currentModule =
+    //             $modules->firstWhere('id',
+    //                 optional(
+    //                     $enrollment->moduleProgress
+    //                         ->where('status', 'in_progress')
+    //                         ->first()
+    //                 )->module_id
+    //             )
+    //             ?? $modules->first();
+    //     }
+
+    //     // ✅ Add this safety check
+    //     if (!$currentModule) {
+    //         return back()->with('error', 'This course has no modules yet.');
+    //     }
+    //     return view('user.course.show', compact(
+    //         'course',
+    //         'modules',
+    //         'enrollment',
+    //         'progress',
+    //         'currentModule'
+    //     ));
+    // }
+    public function show(Request $request, Course $course)
+    {
+        $user = auth()->user();
+
+        // Ensure user is enrolled
+        $enrollment = Enrollment::where('student_id', $user->id)
+            ->where('course_id', $course->id)
+            ->with([
+                'moduleProgress',
+                'course.modules' => fn ($q) => $q->orderBy('position')
+            ])
+            ->first();
+
+        if (!$enrollment) {
+            return redirect()
+                ->route('user.courses.index')
+                ->with('error', 'You are not enrolled in this course.');
+        }
+
         $modules = $course->modules;
 
-        // Progress
-        $totalModules = $modules->count();
-        $completedModules = $enrollment->moduleProgress
+        if ($modules->isEmpty()) {
+            return back()->with('error', 'This course has no modules yet.');
+        }
+
+        // Progress calculation
+        $total = $modules->count();
+        $completed = $enrollment->moduleProgress
             ->where('status', 'completed')
             ->count();
 
-        $progress = $totalModules > 0
-            ? round(($completedModules / $totalModules) * 100)
-            : 0;
+        $progress = round(($completed / $total) * 100);
 
-        // 🔥 Module selection logic
-        $moduleId = $request->query('module');
-
-        if ($moduleId && $modules->contains('id', $moduleId)) {
-            $currentModule = $modules->firstWhere('id', $moduleId);
-        } else {
-            // Resume in-progress module OR first module
-            $currentModule =
-                $modules->firstWhere('id',
-                    optional(
-                        $enrollment->moduleProgress
-                            ->where('status', 'in_progress')
-                            ->first()
-                    )->module_id
-                )
-                ?? $modules->first();
-        }
+        $currentModule = $this->resolveCurrentModule($request, $modules, $enrollment);
 
         return view('user.course.show', compact(
             'course',
@@ -243,6 +285,5 @@ class CourseController extends Controller
             'currentModule'
         ));
     }
-
 }
 

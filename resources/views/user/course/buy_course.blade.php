@@ -130,6 +130,25 @@
     </div>
 </div>
 
+<div id="appToast"
+     class="toast position-fixed bottom-0 end-0 m-3 bg-danger d-none"
+     role="alert"
+     aria-live="assertive"
+     aria-atomic="true"
+     data-bs-delay="4000">
+
+    <div class="toast-header text-white">
+        <strong class="me-auto">
+            <i class="bx bx-bell me-2"></i>
+            <span id="toastTitle">Notification</span>
+        </strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+    </div>
+
+    <div class="toast-body text-white" id="toastBody">
+        Message here
+    </div>
+</div>
 {{-- Flutterwave --}}
 <script src="https://checkout.flutterwave.com/v3.js"></script>
 @php
@@ -140,36 +159,58 @@
 @endphp
 
 <script>
-document.getElementById('buy-now').addEventListener('click', function () {
-    FlutterwaveCheckout({
-        public_key: "{{ config('services.flutterwave.public_key') }}",
-        tx_ref: "{{ $tx_ref }}",
-        amount: {{ $totalAmount }},
-        currency: "NGN",
-        payment_options: "card,banktransfer,ussd",
+    let paymentCompleted = false;
+    document.getElementById('buy-now').addEventListener('click', function () {
+        FlutterwaveCheckout({
+            public_key: "{{ config('services.flutterwave.public_key') }}",
+            tx_ref: "{{ $tx_ref }}",
+            amount: {{ $totalAmount }},
+            currency: "NGN",
+            payment_options: "card,banktransfer,ussd",
 
-        customer: {
-            email: "{{ auth()->user()->email }}",
-            name: "{{ auth()->user()->name }}"
-        },
+            customer: {
+                email: "{{ auth()->user()->email }}",
+                name: "{{ auth()->user()->name }}"
+            },
 
-        customizations: {
-            title: "{{ $course->title }}",
-            description: "Course Enrollment Payment",
-            logo: "{{ asset('assets/img/logo.png') }}"
-        },
+            meta: {
+                course_id: "{{ $course->id }}",
+                student_id: "{{ auth()->id() }}"
+            },
 
-        callback: function (response) {
-            window.location.href = 
-                "/user/course/{{ $course->id }}/callback?tx_ref=" + response.tx_ref +
-                "&transaction_id=" + response.transaction_id;
-        },
+            customizations: {
+                title: "{{ $course->title }}",
+                description: "Course Enrollment Payment",
+                logo: "{{ asset('storage/'.$globalSetting->site_logo) }}"
+            },
 
-        onclose: function () {
-            console.log("Payment closed");
-        }
+            // callback: function (response) {
+            //     paymentCompleted = true;
+            //     window.location.href = 
+            //         "/user/course/{{ $course->id }}/callback?tx_ref=" + response.tx_ref +
+            //         "&transaction_id=" + response.transaction_id;
+            // },
+            redirect_url: "{{ route('user.course.callback', $course->id) }}",
+
+            onclose: function () {
+                // console.log("Payment closed");
+                if (!paymentCompleted) {
+                    const toastElement = document.getElementById('appToast');
+                    const toastTitle = document.getElementById('toastTitle');
+                    const toastBody = document.getElementById('toastBody');
+
+                    toastElement.classList.remove('d-none');
+                    toastElement.classList.add('d-block');
+
+                    toastTitle.innerText = "Payment Canceled";
+                    toastBody.innerText = "You closed the payment without completing it.";
+
+                    const toast = new bootstrap.Toast(toastElement);
+                    toast.show();
+                };
+            }
+        });
     });
-});
 </script>
 
 @endsection
