@@ -11,6 +11,7 @@
     <!-- Favicon -->
     @php
       $favicon = $globalSetting->favicon ?? null;
+      $logo = $globalSetting->site_logo ?? null;
     @endphp
 
     <link rel="icon"
@@ -23,28 +24,64 @@
       href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
       rel="stylesheet" />
 
-    <link rel="stylesheet" href="{{asset('assets/vendor/fonts/iconify-icons.css')}}" />
+    <link rel="stylesheet" href="{{asset('dashboardassets/vendor/fonts/iconify-icons.css')}}" />
 
-    <link rel="stylesheet" href="{{asset('assets/vendor/css/core.css')}}" />
-    <link rel="stylesheet" href="{{asset('assets/css/demo.css')}}" />
+    <link rel="stylesheet" href="{{asset('dashboardassets/vendor/css/core.css')}}" />
+    <link rel="stylesheet" href="{{asset('dashboardassets/css/demo.css')}}" />
 
     <!-- Vendors CSS -->
 
-    <link rel="stylesheet" href="{{asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css')}}" />
+    <link rel="stylesheet" href="{{asset('dashboardassets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css')}}" />
 
     <!-- endbuild -->
 
     <!-- Page CSS -->
     <!-- Page -->
-    <link rel="stylesheet" href="{{asset('assets/vendor/css/pages/page-auth.css')}}" />
+    <link rel="stylesheet" href="{{asset('dashboardassets/vendor/css/pages/page-auth.css')}}" />
 
     <!-- Helpers -->
-    <script src="{{asset('assets/vendor/js/helpers.js')}}"></script>
-    <script src="{{asset('assets/js/config.js')}}"></script>
+    <script src="{{asset('dashboardassets/vendor/js/helpers.js')}}"></script>
+    <script src="{{asset('dashboardassets/js/config.js')}}"></script>
   </head>
-
   <body>
     <!-- Content -->
+     
+    @if (session('status') || session('success') || session('error') || $errors->any())
+      <div id="appToast"
+          class="bs-toast toast fade show position-fixed top-0 end-0 m-3
+          {{ session('status') || session('success') ? 'bg-success' : (session('error') ? 'bg-danger' : 'bg-warning') }}"
+          role="alert">
+
+          <div class="toast-header text-white">
+              <div class="me-auto fw-medium">
+                  @if (session('status') || session('success'))
+                      Success
+                  @elseif (session('error'))
+                      Error
+                  @else
+                      Validation
+                  @endif
+              </div>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+          </div>
+
+          <div class="toast-body text-white">
+              @if (session('status'))
+                  {{ session('status') }}
+              @elseif (session('success'))
+                  {{ session('success') }}
+              @elseif (session('error'))
+                  {{ session('error') }}
+              @elseif ($errors->any())
+                  <ul class="mb-0">
+                      @foreach ($errors->all() as $error)
+                          <li>{{ $error }}</li>
+                      @endforeach
+                  </ul>
+              @endif
+          </div>
+      </div>
+    @endif
 
     <div class="container-xxl">
       <div class="authentication-wrapper authentication-basic container-p-y">
@@ -53,25 +90,44 @@
           <div class="card px-sm-6 px-0">
             <div class="card-body">
               <!-- Logo -->
-              <div class="app-brand justify-content-center">
-                <img src="{{asset('assets/images/logo1.jpg')}}" alt="Logo" width="300px">
+              <div class="app-brand justify-content-center mb-1">
+                <img src="{{ $logo ? asset('storage/'.$logo) : asset('assets/img/logo.jpg') }}" alt="Logo" width="50px">
+                <h3 class="pt-3">Teqhitch</h3>
               </div>
               <!-- /Logo -->
               <h4 class="mb-1">Forgot Password? 🔒</h4>
               <p class="mb-6">Enter your email and we'll send you instructions to reset your password</p>
 
-              <form id="formAuthentication" class="mb-6"  action="" method="post">
-                <div class="mb-6">
-                  <label for="email" class="form-label">Email</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    autofocus required />
-                </div>
-                <button class="btn btn-primary d-grid w-100">Send Reset Link</button>
+              <form id="formAuthentication"
+                    class="mb-6"
+                    action="{{ route('password.email') }}"
+                    method="POST">
+
+                  @csrf
+
+                  <div class="mb-6">
+                      <label for="email" class="form-label">Email</label>
+                      <input
+                          type="email"
+                          class="form-control @error('email') is-invalid @enderror"
+                          id="email"
+                          name="email"
+                          value="{{ old('email') }}"
+                          placeholder="Enter your email"
+                          required
+                          autofocus />
+
+                      @error('email')
+                          <div class="invalid-feedback">
+                              {{ $message }}
+                          </div>
+                      @enderror
+                  </div>
+
+                  <button class="btn btn-primary d-grid w-100">
+                      Send Reset Link
+                  </button>
+
               </form>
               <div class="text-center">
                 <a href="{{ route('login') }}" class="d-flex justify-content-center">

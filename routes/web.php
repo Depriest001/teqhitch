@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\View\ViewController;
+use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\AuthController\AuthController;
 use App\Http\Middleware\CheckInstructor;
 
@@ -48,6 +51,44 @@ Route::controller(\App\Http\Controllers\View\ViewController::class)->group(funct
 // Flutterwave webhook (topic payment)
 Route::post('flutterwave/webhook', [SearchTopicController::class, 'webhook']);
 Route::post('course/flutterwave/webhook', [CourseController::class, 'webhook']);
+
+/*
+|--------------------------------------------------------------------------
+| Email Verification Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    Route::get('/email/verify', 
+        [EmailVerificationController::class, 'notice']
+    )->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', 
+        [EmailVerificationController::class, 'verify']
+    )->middleware('signed')->name('verification.verify');
+
+    Route::post('/email/verification-notification', 
+        [EmailVerificationController::class, 'resend']
+    )->middleware('throttle:6,1')->name('verification.send');
+
+});
+
+Route::middleware('guest')->group(function () {
+
+    Route::post('forgot-password', 
+        [PasswordResetController::class, 'sendResetLinkEmail']
+    )->middleware('throttle:3,1')->name('password.email');
+
+    Route::get('reset-password/{token}', 
+        [PasswordResetController::class, 'showResetForm']
+    )->name('password.reset');
+
+    Route::post('reset-password', 
+        [PasswordResetController::class, 'reset']
+    )->name('password.update');
+
+});
 
 Route::controller(AuthController::class)->group(function () {
 

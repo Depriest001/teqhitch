@@ -52,13 +52,21 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            if ($user->role === 'instructor') {
-                return redirect()->route('staff.dashboard')
-                    ->with('success', 'Welcome Instructor');
+            if (! $user->hasVerifiedEmail()) {
+                return redirect()->route('verification.notice');
             }
 
-            return redirect()->route('user.dashboard')
-                ->with('success', 'Login successful');
+            // if ($user->role === 'instructor') {
+            //     return redirect()->route('staff.dashboard')
+            //         ->with('success', 'Welcome Instructor');
+            // }
+
+            // return redirect()->route('user.dashboard')
+            //     ->with('success', 'Login successful');
+
+            return $user->role === 'instructor'
+            ? redirect()->route('staff.dashboard')
+            : redirect()->route('user.dashboard');
         }
 
         return back()->withErrors([
@@ -108,15 +116,17 @@ class AuthController extends Controller
                 'status' => 'active',                    // default status
                 'avatar' => 'user.png',                // static avatar stored in public/images/avatar.png
             ]);
-
-            // Optional: login the user after registration
-            Auth::login($user);
-            
             // Create Instructor Profile
             StudentProfile::create([
                 'user_id' => $user->id,
             ]);
 
+            $user->sendEmailVerificationNotification();
+
+            // Optional: login the user after registration
+            Auth::login($user);
+
+            return redirect()->route('verification.notice');
         });
 
 
