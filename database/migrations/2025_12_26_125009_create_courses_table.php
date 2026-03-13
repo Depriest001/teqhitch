@@ -16,13 +16,16 @@ return new class extends Migration
             $table->foreignId('instructor_id')->constrained('users')->cascadeOnDelete();
             $table->string('title');
             $table->string('slug')->unique();
+            $table->string('subtitle')->nullable();
             $table->text('description')->nullable();
+            $table->text('overview')->nullable();
             $table->decimal('price',10,2)->default(0);
             $table->string('duration');
             $table->string('thumbnail')->nullable();
             $table->enum('status',['draft','published','deleted'])->default('published');
             $table->timestamps();
         });
+        
     }
 
     /**

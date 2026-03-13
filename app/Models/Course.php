@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Course extends Model
 {
@@ -13,12 +14,64 @@ class Course extends Model
         'instructor_id',
         'title',
         'slug',
+        'subtitle',
         'description',
+        'overview',
         'price',
         'duration',
         'thumbnail',
+        'icon',
         'status',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Boot Method (Slug Auto Generation)
+    |--------------------------------------------------------------------------
+    */
+
+    protected static function booted()
+    {
+        // Generate slug on create
+        static::creating(function ($course) {
+            $course->slug = static::generateUniqueSlug($course->title);
+        });
+
+        // Regenerate slug only if title changes
+        static::updating(function ($course) {
+            if ($course->isDirty('title')) {
+                $course->slug = static::generateUniqueSlug(
+                    $course->title,
+                    $course->id
+                );
+            }
+        });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Slug Generator
+    |--------------------------------------------------------------------------
+    */
+
+    protected static function generateUniqueSlug($title, $ignoreId = null)
+    {
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+        $count = 1;
+
+        while (
+            static::where('slug', $slug)
+                ->when($ignoreId, function ($query) use ($ignoreId) {
+                    $query->where('id', '!=', $ignoreId);
+                })
+                ->exists()
+        ) {
+            $slug = $originalSlug . '_' . $count++;
+        }
+
+        return $slug;
+    }
 
     /**
      * Get the instructor (user) who owns the course.
@@ -53,5 +106,17 @@ class Course extends Model
             'course_id',        // foreign key on pivot for course
             'student_id'        // foreign key on pivot for user
         );
+    }
+
+    // Course Features
+    public function features()
+    {
+        return $this->hasMany(CourseFeature::class)->active()->orderBy('position');
+    }
+
+    // Course Outcomes
+    public function outcomes()
+    {
+        return $this->hasMany(CourseOutcome::class)->orderBy('position');
     }
 }

@@ -4,69 +4,84 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Notifications\ResetPasswordNotification;
 
 class PasswordResetController extends Controller
 {
 
     // Send reset link
+    // public function sendResetLinkEmail(Request $request)
+    // {
+    //     $request->validate([
+    //         'email' => 'required|email'
+    //     ]);
+
+    //     $status = Password::sendResetLink(
+    //         $request->only('email')
+    //     );
+
+    //     return $status === Password::RESET_LINK_SENT
+    //         ? back()->with('status', __($status))
+    //         : back()->withErrors(['email' => __($status)]);
+    // }
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate([
             'email' => 'required|email'
         ]);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $user = User::where('email', $request->email)->first();
 
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with('status', __($status))
-            : back()->withErrors(['email' => __($status)]);
+        if (!$user) {
+            return back()->withErrors(['email' => 'No account found with this email.']);
+        }
+
+        // Generate password reset token
+        $token = Password::createToken($user);
+
+        // Send the reset notification (immediately)
+        $user->notify(new ResetPasswordNotification($token, $user));
+
+        return back()->with('status', 'We have emailed your password reset link!');
     }
 
     // Show reset form
-    // public function showResetForm($token)
-    // {
-    //     return view('auth.reset-password', [
-    //         'token' => $token,
-    //         'email' => request('email')
-    //     ]);
-    // }
-    public function showResetForm($token)
+    public function showResetForm(Request $request, $token)
     {
         $record = DB::table('password_reset_tokens')
-            ->where('token', hash('sha256', $token))
+            ->where('email', $request->email)
             ->first();
-
-        $expireMinutes = config('auth.passwords.users.expire');
 
         $remainingSeconds = 0;
 
         if ($record) {
 
-            // Force UTC because DB timestamps are stored in UTC
-            $created = Carbon::parse($record->created_at, 'UTC');
+            $expireMinutes = config('auth.passwords.users.expire');
 
-            $expiresAt = $created->addMinutes($expireMinutes);
+            $created = Carbon::parse($record->created_at);
 
-            $remainingSeconds = now('UTC')->lt($expiresAt)
-                ? now('UTC')->diffInSeconds($expiresAt)
-                : 0;
+            $expiresAt = $created->copy()->addMinutes($expireMinutes);
+
+            $remainingSeconds = max(
+                0,
+                $expiresAt->timestamp - now()->timestamp
+            );
         }
 
         return view('auth.reset-password', [
             'token' => $token,
-            'email' => request('email'),
+            'email' => $request->email,
             'remainingSeconds' => $remainingSeconds
         ]);
     }
 
-    // Handle reset
     public function reset(Request $request)
     {
         $request->validate([
@@ -84,12 +99,29 @@ class PasswordResetController extends Controller
                     'remember_token' => Str::random(60),
                 ])->save();
 
+                // 🔥 Log the user in immediately
+                Auth::login($user);
+
+                $request->session()->regenerate();
             }
         );
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')
-                ->with('success', 'Password reset successful. Please login.')
-            : back()->withErrors(['email' => [__($status)]]);
+        if ($status === Password::PASSWORD_RESET) {
+
+            $user = Auth::user();
+
+            // Optional: email verification check
+            if (! $user->hasVerifiedEmail()) {
+                return redirect()->route('verification.notice');
+            }
+
+            return $user->role === 'instructor'
+                ? redirect()->route('staff.dashboard')
+                : redirect()->route('user.dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => [__($status)],
+        ]);
     }
 }

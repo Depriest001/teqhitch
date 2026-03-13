@@ -6,7 +6,7 @@
     
     @if (session('success') || session('error') || $errors->any())
         <div id="appToast"
-            class="bs-toast toast fade show position-fixed bottom-0 end-0 m-3
+            class="bs-toast toast fade show position-fixed top-0 end-0 m-3
             {{ session('success') ? 'bg-success' : (session('error') ? 'bg-danger' : 'bg-warning') }}"
             role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
             <div class="toast-header text-white">
@@ -100,7 +100,7 @@
                         <td>{{ $loop->iteration }}</td>
 
                         <td>
-                            <img src="{{ $course->thumbnail ? asset('storage/'.$course->thumbnail) : '' }}" 
+                            <img src="{{ $course->thumbnail ? asset('uploads/'.$course->thumbnail) : '' }}" 
                                 width="40" height="40" class="rounded">
                         </td>
 

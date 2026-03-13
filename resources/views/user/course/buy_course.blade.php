@@ -6,8 +6,8 @@
     
     @if (session('success') || session('error') || $errors->any())
         <div id="appToast"
-            class="bs-toast toast fade show position-fixed bottom-0 end-0 m-3
-            {{ session('success') ? 'bg-success' : (session('error') ? 'bg-danger' : 'bg-warning') }}"
+            class="bs-toast toast fade show position-fixed top-0 end-0 m-3
+            {{ session('success') ? 'bg-success' : (session('error') ? 'bg-warning' : 'bg-danger') }}"
             role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
             <div class="toast-header text-white">
                 <i class="icon-base bx bx-bell me-2"></i>
@@ -45,7 +45,7 @@
             <div class="card shadow-sm border-0">
                 <div class="row g-0">
                     <div class="col-md-4">
-                        <img src="{{ asset('storage/'.$course->thumbnail) }}"
+                        <img src="{{ asset('uploads/'.$course->thumbnail) }}"
                              class="img-fluid rounded-start h-100 object-fit-cover"
                              alt="{{ $course->title }}">
                     </div>
@@ -59,7 +59,7 @@
                             </p>
 
                             <p class="card-text">
-                                {!! Str::limit(strip_tags($course->description), 300) !!}
+                                {!! Str::limit(strip_tags($course->overview), 300) !!}
                             </p>
 
                             <hr>
@@ -181,15 +181,9 @@
             customizations: {
                 title: "{{ $course->title }}",
                 description: "Course Enrollment Payment",
-                logo: "{{ asset('storage/'.$globalSetting->site_logo) }}"
+                logo: "{{ asset('uploads/'.$globalSetting->site_logo) }}"
             },
 
-            // callback: function (response) {
-            //     paymentCompleted = true;
-            //     window.location.href = 
-            //         "/user/course/{{ $course->id }}/callback?tx_ref=" + response.tx_ref +
-            //         "&transaction_id=" + response.transaction_id;
-            // },
             redirect_url: "{{ route('user.course.callback', $course->id) }}",
 
             onclose: function () {

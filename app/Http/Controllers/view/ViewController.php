@@ -48,14 +48,14 @@ class ViewController extends Controller
 
     public function serviceDetail($slug)
     {
-        // Get the service by slug
-        $service = Course::where('slug', $slug)->firstOrFail();
+        $course = Course::with([
+                'features',
+                'outcomes'
+            ])
+            ->where('slug', $slug)
+            ->where('status', 'published') // important for security
+            ->firstOrFail();
 
-        // Get all services for sidebar
-        $allServices = Course::where('status', 'published')
-            ->get();
-
-        return view('frontend.services_detail', compact('service', 'allServices'));
+        return view('frontend.services_detail', compact('course'));
     }
-    
 }

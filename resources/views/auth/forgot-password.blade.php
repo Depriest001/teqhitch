@@ -160,6 +160,15 @@
     <!-- Main JS -->
 
     <script src="{{asset('assets/js/main.js')}}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const appToast = document.getElementById('appToast');
+            if (appToast) {
+            const toast = new bootstrap.Toast(appToast);
+            toast.show();
+            }
+        });
+    </script>
 
   </body>
 </html>

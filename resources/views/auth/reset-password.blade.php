@@ -48,38 +48,38 @@
     <!-- Content -->
     
     @if (session('success') || session('error') || $errors->any())
-    <div id="appToast"
-        class="bs-toast toast fade show position-fixed top-0 end-0 m-3
-        {{ session('success') ? 'bg-success' : (session('error') ? 'bg-danger' : 'bg-warning') }}"
-        role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
-        <div class="toast-header text-white">
-            <i class="icon-base bx bx-bell me-2"></i>
-            <div class="me-auto fw-medium">
-            @if (session('success'))
-                Success
-            @elseif (session('error'))
-                Error
-            @else
-                Validation
-            @endif
+        <div id="appToast"
+            class="bs-toast toast fade show position-fixed top-0 end-0 m-3
+            {{ session('success') ? 'bg-success' : (session('error') ? 'bg-danger' : 'bg-warning') }}"
+            role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+            <div class="toast-header text-white">
+                <i class="icon-base bx bx-bell me-2"></i>
+                <div class="me-auto fw-medium">
+                @if (session('success'))
+                    Success
+                @elseif (session('error'))
+                    Error
+                @else
+                    Validation
+                @endif
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
 
-        <div class="toast-body text-white">
-            @if (session('success'))
-            {{ session('success') }}
-            @elseif (session('error'))
-            {{ session('error') }}
-            @elseif ($errors->any())
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-            @endif
+            <div class="toast-body text-white">
+                @if (session('success'))
+                {{ session('success') }}
+                @elseif (session('error'))
+                {{ session('error') }}
+                @elseif ($errors->any())
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                @endif
+            </div>
         </div>
-    </div>
     @endif
 
     <div class="container-xxl">
@@ -193,30 +193,28 @@
 
     <script src="{{asset('dashboardassets/js/main.js')}}"></script>
     <script>
-        let timeLeft = {{ $remainingSeconds ?? 0 }};
+        let timeLeft = {{ $remainingSeconds }};
         const countdownEl = document.getElementById('countdown');
-        alert(timeLeft);
-        if (timeLeft <= 0) {
-            countdownEl.textContent = "Expired";
-        } else {
-            const timer = setInterval(() => {
 
-                let minutes = Math.floor(timeLeft / 60);
-                let seconds = timeLeft % 60;
+        function updateTimer() {
+            if (timeLeft <= 0) {
+                countdownEl.textContent = "Expired";
+                return;
+            }
 
-                seconds = seconds < 10 ? '0' + seconds : seconds;
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
 
-                countdownEl.textContent = minutes + ':' + seconds;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
 
-                timeLeft--;
+            countdownEl.textContent = minutes + ':' + seconds;
 
-                if (timeLeft < 0) {
-                    clearInterval(timer);
-                    countdownEl.textContent = "Expired";
-                }
+            timeLeft--;
 
-            }, 1000);
+            setTimeout(updateTimer, 1000);
         }
+
+        updateTimer();
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

@@ -120,42 +120,46 @@
     <!-- About End -->
 
     <!-- Service Start -->
-    <div class="container-fluid pt-5">
+    <div class="container-fluid pt-5 mb-0" style="background: linear-gradient(to bottom right, #12E4D2, #13328C, #B7FE5A);">
         <div class="container py-5">
             <div class="mx-auto text-center wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
-                <div class="btn btn-sm border rounded-pill text-primary px-3 mb-3">Our Services</div>
-                <h1 class="mb-4">Innovative Tech Training & Digital Solutions</h1>
+                <div class="btn btn-sm border rounded-pill text-white px-3 mb-3">Tech Training</div>
+                <h1 class="mb-4 text-white">Innovative Tech Training & Digital Solutions</h1>
             </div>
-            <div class="slider-wrapper">
-                <div class="nav-btn nav-prev">&#10094;</div>
-                <div class="nav-btn nav-next">&#10095;</div>
+            <div class="row g-4">
 
-                <div class="owl-carousel my-slider">
-                    @foreach($courses as $course)
-                        <div class="item">
-                            <div class="case-item position-relative overflow-hidden rounded mb-2">
-                                <img class="img-fluid"
-                                    src="{{ asset('storage/'.$course->thumbnail ?? 'assets/img/project-1.jpg') }}"
-                                    alt="{{ $course->title }}">
+                @forelse($courses as $course)
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="card service-card border-0 shadow-sm h-100 p-4 d-flex flex-column">
 
-                                <a class="case-overlay text-decoration-none"
-                                href="{{ route('service.show', $course->slug) }}">
+                            <div class="d-flex mb-3">
+                                {{-- Icon (fallback if empty) --}}
+                                <i class="{{ $course->icon ?? 'fas fa-graduation-cap' }} fa-3x text-primary me-3"></i>
 
-                                    <small>{{ $course->title }}</small>
+                                <h4 class="fw-bold">
+                                    {{ $course->title }}
+                                </h4>
+                            </div>
 
-                                    <h5 class="lh-base text-white mb-3">
-                                        {!! Str::limit(strip_tags($course->description), 50) !!}
-                                    </h5>
+                            <p class="text-muted">
+                                {{ Str::limit(strip_tags($course->description), 120) }}
+                            </p>
 
-                                    <span class="btn btn-square btn-primary">
-                                        <i class="fa fa-arrow-right"></i>
-                                    </span>
+                            <div class="mt-auto">
+                                <a href="{{ route('service.show', $course->slug) }}"
+                                class="btn btn-outline-primary"
+                                style="border-radius: 5px;">
+                                    Learn More
                                 </a>
                             </div>
-                        </div>
-                    @endforeach
 
-                </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12 text-center">
+                        <p class="text-muted">No courses available at the moment.</p>
+                    </div>
+                @endforelse
 
             </div>
         </div>
@@ -163,7 +167,7 @@
     <!-- Service End -->
 
     <!-- Case Start -->
-    <div class="container-fluid bg-light mt-5 py-5">
+    <div class="container-fluid bg-light py-5">
         <div class="container py-5">
             <div class="row g-5 align-items-center">
                 <div class="col-lg-5 fadeIn" data-wow-delay="0.1s">

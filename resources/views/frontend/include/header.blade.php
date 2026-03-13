@@ -25,10 +25,10 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav ms-auto" style="bg-success">
-                        <a href="{{route('home')}}" class="nav-item nav-link active">Home</a>
-                        <a href="{{route('about')}}" class="nav-item nav-link">About</a>
-                        <a href="{{route('services')}}" class="nav-item nav-link">Courses</a>
-                        <a href="{{route('contact')}}" class="nav-item nav-link">Contact</a>
+                        <a href="{{route('home')}}" class="nav-item nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Home</a>
+                        <a href="{{route('about')}}" class="nav-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}">About</a>
+                        <a href="{{route('services')}}" class="nav-item nav-link {{ request()->routeIs('services') ? 'active' : '' }}">Courses</a>
+                        <a href="{{route('contact')}}" class="nav-item nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a>
                         <div class="nav-item d-block d-lg-none  mb-3">
                           <a href="{{ route('login') }}" class="btn btn-primary rounded-pill me-2 px-3">Login</a>
                           <a href="{{ route('register') }}" class="btn btn-primary rounded-pill px-3">Sign Up</a>

@@ -1,67 +1,206 @@
 @extends('frontLayout')
 @section('title','Services - Teqhitch ICT Academy LTD')
+
 @section('content')
-    
-   
-    <!-- Hero Start -->
-    <div class="container-fluid pt-5 hero-header">
-        <div class="container pt-5">
-            <div class="row g-5 pt-5">
-                <div class="col-lg-6 align-self-center text-center text-lg-start mb-lg-5">
-                    <h1 class="display-4 text-white mb-4 animated slideInRight">Our Services</h1>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb justify-content-center justify-content-lg-start mb-0">
-                            <li class="breadcrumb-item"><a class="text-white" href="{{route('home')}}">Home</a></li>
-                            <li class="breadcrumb-item text-white active" aria-current="page">Our Services</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
+<style>
+body{
+    background: #fcfcfc;
+}
+.btn-outline-primary{color:#1363C6;border-color:#1363C6}
+.btn-outline-primary:hover{color:#fff;background-color:#1363C6;border-color:#1363C6}
+</style>
+
+<div class="container-fluid pt-5 hero-header">
+    <div class="container pt-5">
+        <div class="col-md-8 offset-md-2 text-center mb-lg-5">
+            <h1 class="display-4 text-white mb-4 animated slideInRight">
+                Innovative Tech Training & Digital Solutions
+            </h1>
+            <p class="text-white pb-4">
+                At Teqhitch ICT Academy, we provide industry-driven technology training
+                & digital solutions designed to equip individuals and organizations
+                with practical skills for the modern digital economy.
+            </p>
         </div>
     </div>
-    <!-- Hero End -->
+</div>
+<!-- Hero End -->
 
-    <!-- Service Start -->
-    <div class="container-fluid pt-5">
-        <div class="container py-5">
-            <div class="mx-auto text-center wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
-                <div class="btn btn-sm border rounded-pill text-primary px-3 mb-3">Our Services</div>
-                <h1 class="mb-4">Innovative Tech Training & Digital Solutions</h1>
-            </div>
-            <div class="slider-wrapper">
-                <div class="nav-btn nav-prev">&#10094;</div>
-                <div class="nav-btn nav-next">&#10095;</div>
 
-                <div class="owl-carousel my-slider">
-                    @foreach($courses as $course)
-                        <div class="item">
-                            <div class="case-item position-relative overflow-hidden rounded mb-2">
-                                <img class="img-fluid"
-                                    src="{{ asset('storage/'.$course->thumbnail ?? 'assets/img/project-1.jpg') }}"
-                                    alt="{{ $course->title }}">
+<!-- TECH TRAINING -->
+<section class="py-5">
+    <div class="container">
+        <div class="mb-5">
+            <h2 class="fw-bold">Tech Training</h2>
+        </div>
+        
+        <div class="row g-4">
 
-                                <a class="case-overlay text-decoration-none"
-                                href="{{ route('service.show', $course->slug) }}">
+            @forelse($courses as $course)
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card service-card border-0 shadow-sm h-100 p-4 d-flex flex-column">
 
-                                    <small>{{ $course->title }}</small>
+                        <div class="d-flex mb-3">
+                            {{-- Icon (fallback if empty) --}}
+                            <i class="{{ $course->icon ?? 'fas fa-graduation-cap' }} fa-3x text-primary me-3"></i>
 
-                                    <h5 class="lh-base text-white mb-3">
-                                        {!! Str::limit(strip_tags($course->description), 50) !!}
-                                    </h5>
-
-                                    <span class="btn btn-square btn-primary">
-                                        <i class="fa fa-arrow-right"></i>
-                                    </span>
-                                </a>
-                            </div>
+                            <h4 class="fw-bold">
+                                {{ $course->title }}
+                            </h4>
                         </div>
-                    @endforeach
 
+                        <p class="text-muted">
+                            {{ Str::limit(strip_tags($course->description), 120) }}
+                        </p>
+
+                        <div class="mt-auto">
+                            <a href="{{ route('service.show', $course->slug) }}"
+                            class="btn btn-outline-primary"
+                            style="border-radius: 5px;">
+                                Learn More
+                            </a>
+                        </div>
+
+                    </div>
                 </div>
+            @empty
+                <div class="col-12 text-center">
+                    <p class="text-muted">No courses available at the moment.</p>
+                </div>
+            @endforelse
 
-            </div>
         </div>
     </div>
-    <!-- Service End -->
-    
+</section>
+
+
+<!-- DIGITAL SOLUTIONS -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="mb-5">
+            <h2 class="fw-bold">Digital Solutions</h2>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="card service-card border-0 shadow h-100 p-4">
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-laptop-code fa-3x text-primary me-3"></i>
+                        <h4 class="fw-bold">Website Development</h4>
+                    </div>
+                    
+                    <p class="text-muted">
+                        Custom, responsive and SEO-friendly websites
+                        tailored to your business needs.
+                    </p>
+                    <div class="mt-auto">
+                        <a href="#" class="btn btn-outline-primary col-5" style="border-radius: 5px;">Learn More</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card service-card border-0 shadow h-100 p-4">
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-cogs fa-3x text-primary me-3"></i>
+                        <h4 class="fw-bold">Business Software Development</h4>
+                    </div>
+                    <p class="text-muted">
+                        Create efficient, scalable and customized
+                        software solutions for your operations.
+                    </p>
+                    <div class="mt-auto">
+                        <a href="#" class="btn btn-outline-primary col-5" style="border-radius: 5px;">Learn More</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card service-card border-0 shadow h-100 p-4">
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-shopping-cart fa-3x text-primary me-3"></i>
+                        <h4 class="fw-bold">E-commerce Development</h4>
+                    </div>
+                    
+                    <p class="text-muted">
+                        Build secure, feature-rich online stores
+                        to boost your digital sales.
+                    </p>
+                    <div class="mt-auto">
+                        <a href="#" class="btn btn-outline-primary col-5" style="border-radius: 5px;">Learn More</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- WHY CHOOSE US -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+                <h3 class="fw-bold mb-4">Why Choose Teqhitch</h3>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle me-2"
+                            style="width: 20px; height: 20px; font-size: 12px;">
+                            <i class="fa fa-check small"></i>
+                        </div>
+                        Industry based curriculum
+                    </li>
+                    <li class="mb-2">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle me-2"
+                            style="width: 20px; height: 20px; font-size: 12px;">
+                            <i class="fa fa-check small"></i>
+                        </div>
+                        Experienced instructors
+                    </li>
+                    <li class="mb-2">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle me-2"
+                            style="width: 20px; height: 20px; font-size: 12px;">
+                            <i class="fa fa-check small"></i>
+                        </div>
+                        Hands-on project training
+                    </li>
+                    <li class="mb-2">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle me-2"
+                            style="width: 20px; height: 20px; font-size: 12px;">
+                            <i class="fa fa-check small"></i>
+                        </div>
+                        Internship opportunities
+                    </li>
+                    <li>
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle me-2"
+                            style="width: 20px; height: 20px; font-size: 12px;">
+                            <i class="fa fa-check small"></i>
+                        </div>
+                        Career mentorship
+                    </li>
+                </ul>
+            </div>
+            <!-- <div class="col-md-5 ps-lg-0 pt-5 pt-md-0 text-start wow fadeIn" data-wow-delay="0.3s" style="visibility: visible; animation-delay: 0.3s; animation-name: fadeIn;">
+                    <img class="img-fluid" src="{{ asset('assets/img/newsletter.png')}}" alt="">
+                </div> -->
+            <div class="col-md-6 text-center">
+                <img class="img-fluid" src="{{ asset('assets/img/newsletter.png')}}" alt="Why Choose Us" style="transform: scaleX(-1);">
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- CTA -->
+<section class="py-5 text-center text-white bg-primary" style="background: linear-gradient(to right, #14183E, #1b7c74, #14183E);">
+    <div class="container">
+        <h3 class="fw-bold text-white mb-3">Start Your Tech Journey Today</h3>
+        <a href="{{ route('register') }}" class="btn btn-light px-4">Enroll Now</a>
+    </div>
+</section>
+
 @endsection

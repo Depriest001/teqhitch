@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeMail;
+use Illuminate\Auth\Events\Verified;
 
 class EmailVerificationController extends Controller
 {
@@ -19,16 +23,30 @@ class EmailVerificationController extends Controller
 
     public function verify(EmailVerificationRequest $request)
     {
-        $request->fulfill();
+        // Wrap in DB transaction to ensure atomic operation
+        DB::transaction(function () use ($request) {
 
+            // Mark the user as verified
+            $request->fulfill();
+
+            // Fire Verified event (optional, triggers listeners)
+            event(new Verified($request->user()));
+
+            // Queue welcome email **only after successful commit**
+            Mail::to($request->user()->email)
+                ->send(new WelcomeMail($request->user()));
+
+        }, 3); // retry 3 times in case of deadlock
+
+        // Redirect the user based on role
         return $this->redirectByRole($request->user());
     }
 
     public function resend(Request $request)
     {
-        $request->user()->sendEmailVerificationNotification();
+        $request->sendEmailVerificationNotification();
+        // $user->sendEmailVerificationNotification()
 
-        // return back()->with('message', 'Verification link sent!');
         return back()->with('success', 'Verification link sent successfully!');
     }
 

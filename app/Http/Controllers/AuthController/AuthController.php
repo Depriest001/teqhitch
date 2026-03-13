@@ -56,14 +56,6 @@ class AuthController extends Controller
                 return redirect()->route('verification.notice');
             }
 
-            // if ($user->role === 'instructor') {
-            //     return redirect()->route('staff.dashboard')
-            //         ->with('success', 'Welcome Instructor');
-            // }
-
-            // return redirect()->route('user.dashboard')
-            //     ->with('success', 'Login successful');
-
             return $user->role === 'instructor'
             ? redirect()->route('staff.dashboard')
             : redirect()->route('user.dashboard');
