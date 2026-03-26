@@ -138,7 +138,7 @@ class SearchTopicController extends Controller
 
         // Generate unique tx_ref
         do {
-            $tx_ref = "Tx" . Str::uuid()->getHex();
+            $tx_ref = "Tx" . Str::uuid()->toHex();
         } while (TopicPayment::where('reference', $tx_ref)->exists());
         
         // Calculate fee on server

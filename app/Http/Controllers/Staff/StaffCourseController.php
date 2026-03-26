@@ -58,14 +58,14 @@ class StaffCourseController extends Controller
         // Ensure course is published
         abort_if($course->status !== 'published', 404, 'Course not found');
 
-        // Eager load relationships
-        $course->load(['modules', 'assignments', 'students']);
+        // Eager load modules and their assignments, and students
+        $course->load(['modules.assignments', 'students']);
 
         // Compute stats
         $stats = [
             'students'    => $course->students()->count(),
-            'assignments' => $course->assignments()->count(),
-            'materials'   => $course->modules()->count(),
+            'assignments' => $course->modules->flatMap(fn($module) => $module->assignments)->count(),
+            'materials'   => $course->modules->count(),
         ];
 
         return view('staff.course.show', compact('course', 'stats'));
@@ -96,7 +96,20 @@ class StaffCourseController extends Controller
             'material'     => 'required|file|mimes:pdf,doc,docx,ppt,pptx,zip,txt|max:20480'
         ]);
 
-        $path = $request->file('material')->store('course_materials','public');
+        $destinationPath = public_path('uploads/course_materials');
+
+        // Create folder if it doesn't exist
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
+
+        $file = $request->file('material');
+
+        $filename = 'module_' . $course->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+        $file->move($destinationPath, $filename);
+
+        $path = 'course_materials/' . $filename;
 
         CourseModule::create([
             'course_id' => $course->id,
@@ -107,6 +120,16 @@ class StaffCourseController extends Controller
             'position'  => $course->modules()->count() + 1,
             'status'    => 'active'
         ]);
+
+        activity_log(
+            'create_lesson',
+            'lessons',
+            [
+                'course_id' => $course->id,
+                'status' => 'success',
+                'description' => 'Instructor created Course Module'
+            ]
+        );
 
         return back()->with('success','Module added successfully');
     }
@@ -146,18 +169,35 @@ class StaffCourseController extends Controller
 
         // Handle file replacement
         if ($request->hasFile('material')) {
+
             // Delete old file if exists
-            if ($module->file_path && Storage::disk('public')->exists($module->file_path)) {
-                Storage::disk('public')->delete($module->file_path);
+            if ($module->file_path && file_exists(public_path('uploads/' . $module->file_path))) {
+                unlink(public_path('uploads/' . $module->file_path));
             }
 
-            $path = $request->file('material')->store('course_materials', 'public');
-            $module->file_path = $path;
-            $module->file_type = $request->file('material')->getClientOriginalExtension();
+            $file = $request->file('material');
+
+            // Generate unique filename
+            $filename = 'module_' . $module->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+            // Move file to public/uploads/course_materials
+            $file->move(public_path('uploads/course_materials'), $filename);
+
+            // Save path in DB
+            $module->file_path = 'course_materials/' . $filename;
+            $module->file_type = $file->getClientOriginalExtension();
         }
 
         $module->save();
-
+        activity_log(
+            'update_lesson',
+            'lessons',
+            [
+                'course_id' => $module->course_id,
+                'status' => 'success',
+                'description' => 'Instructor updated lesson'
+            ]
+        );
         return redirect()
             ->route('staff.courses.show', $course->id)
             ->with('success', 'Module updated successfully!');

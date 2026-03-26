@@ -49,7 +49,7 @@
                         <select name="audience" class="form-select" required>
                             <option value="students" {{ old('audience', $announcement->audience) == 'students' ? 'selected' : '' }}>Student</option>
                             <option value="instructors" {{ old('audience', $announcement->audience) == 'instructors' ? 'selected' : '' }}>Instructor</option>
-                            <option value="admin" {{ old('audience', $announcement->audience) == 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="everyone" {{ old('audience', $announcement->audience) == 'everyone' ? 'selected' : '' }}>Everyone</option>
                         </select>
                     </div>
 

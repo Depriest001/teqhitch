@@ -20,7 +20,7 @@
     
     @if (session('success') || session('error') || $errors->any())
         <div id="appToast"
-            class="bs-toast toast fade show position-fixed bottom-0 end-0 m-3
+            class="bs-toast toast fade show position-fixed top-0 end-0 m-3
             {{ session('success') ? 'bg-success' : (session('error') ? 'bg-danger' : 'bg-warning') }}"
             role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
             <div class="toast-header text-white">
@@ -80,7 +80,7 @@
                     <h5 class="card-title">{{ $assignment->title }}</h5>
 
                     <p class="text-muted small mb-2">
-                        Course: {{ $assignment->course->title }} <br>
+                        Course: {{ $assignment->module->course->title }} <br>
                         Due: {{ \Carbon\Carbon::parse($assignment->deadline)->format('d M Y') }}
                     </p>
 
@@ -102,6 +102,11 @@
                         class="btn btn-outline-secondary btn-sm mt-2">
                             View Submission
                         </a>
+                        <button class="btn btn-info btn-sm mt-2"
+                                data-bs-toggle="offcanvas"
+                                data-bs-target="#submitAssignment{{ $assignment->id }}">
+                            Edit
+                        </button>
                     @else
                         <a href="#" class="btn btn-outline-success btn-sm mt-2">
                             View Grade ({{ $submission->score }}/{{ $assignment->max_score }})

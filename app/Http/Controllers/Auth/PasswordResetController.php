@@ -16,21 +16,6 @@ use App\Notifications\ResetPasswordNotification;
 class PasswordResetController extends Controller
 {
 
-    // Send reset link
-    // public function sendResetLinkEmail(Request $request)
-    // {
-    //     $request->validate([
-    //         'email' => 'required|email'
-    //     ]);
-
-    //     $status = Password::sendResetLink(
-    //         $request->only('email')
-    //     );
-
-    //     return $status === Password::RESET_LINK_SENT
-    //         ? back()->with('status', __($status))
-    //         : back()->withErrors(['email' => __($status)]);
-    // }
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate([
@@ -110,6 +95,14 @@ class PasswordResetController extends Controller
 
             $user = Auth::user();
 
+            activity_log(
+                'password_reset',
+                'authentication',
+                [
+                    'status' => 'success',
+                    'description' => 'You reset account password'
+                ]
+            );
             // Optional: email verification check
             if (! $user->hasVerifiedEmail()) {
                 return redirect()->route('verification.notice');

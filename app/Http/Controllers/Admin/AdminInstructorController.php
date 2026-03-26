@@ -26,7 +26,6 @@ class AdminInstructorController extends Controller
         ]);
     }
 
-
     // ================= SHOW =================
     public function show($id)
     {
@@ -47,7 +46,6 @@ class AdminInstructorController extends Controller
 
         return view('admin.instructor.edit', compact('instructor'));
     }
-
 
     // ================= UPDATE =================
     public function update(Request $request, $id)
@@ -74,7 +72,6 @@ class AdminInstructorController extends Controller
             ->route('admin.instructor.index')
             ->with('success', 'Instructor updated successfully');
     }
-
 
     // ================= STORE =================
     public function store(Request $request)

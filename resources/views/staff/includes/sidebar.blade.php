@@ -60,6 +60,13 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->routeIs('staff.activities') ? 'active' : '' }}">
+            <a href="{{ route('staff.activities') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-calendar-event"></i>
+                <div class="text-truncate"> Activities</div>
+            </a>
+        </li>
+
         <!-- LOGOUT -->
         <li class="menu-item">
             <form id="logout-form" action="{{ route('logout')}}" method="POST" class="d-none">

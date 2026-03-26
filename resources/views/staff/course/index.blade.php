@@ -81,7 +81,7 @@
         <div class="col-xl-4 col-lg-6">
             <div class="card shadow-sm border-0 h-100">
 
-                <img src="{{ $course->thumbnail ? asset('storage/'.$course->thumbnail) : 'https://via.placeholder.com/400x200' }}"
+                <img src="{{ $course->thumbnail ? asset('uploads/'.$course->thumbnail) : 'https://via.placeholder.com/400x200' }}"
                     class="card-img-top"
                     style="height:160px; object-fit:cover;"
                     alt="">

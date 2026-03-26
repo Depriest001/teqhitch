@@ -46,122 +46,95 @@
 
     <!-- Certificates Section -->
     <div class="row g-4">
+        @forelse($enrollments as $enroll)
+            @if(!is_null($enroll->completed_at) && $enroll->certificate && $enroll->certificate->file_path)
+            <div class="col-md-6 col-lg-4">
+                <div class="card certificate-card shadow-sm border-0 h-100">
+                    <div class="card-body">
 
-        <!-- Earned Certificate -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card certificate-card shadow-sm border-0 h-100">
-                <div class="card-body">
+                        <div class="certificate-badge bg-success-subtle text-success mb-3">
+                            <i class="bx bx-check-circle me-1"></i> Earned
+                        </div>
 
-                    <div class="certificate-badge bg-success-subtle text-success mb-3">
-                        <i class="bx bx-check-circle me-1"></i> Earned
+                        <div class="certificate-preview border rounded p-2 mb-3">
+                            <img src="{{ asset('uploads/'.$enroll->certificate->thumbnail) ?? 'https://dummyimage.com/600x400/f0f0f0/000&text=' . urlencode($enroll->course->title) }}"
+                                class="img-fluid rounded" alt="..."
+                                draggable="false"
+                                oncontextmenu="return false;">
+                        </div>
+
+                        <h6 class="fw-bold mb-1">
+                            {{ $enroll->course->title }}
+                        </h6>
+
+                        <p class="text-muted small mb-2">
+                            Awarded on: {{ optional($enroll->certificate->issued_at)->format('F d, Y') }}
+                        </p>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ route('user.certificate.show', $enroll->certificate->certificate_code) }}" 
+                            class="btn btn-outline-dark btn-sm">
+                                <i class="bx bx-show me-1"></i> View
+                            </a>
+
+                            <a href="{{ asset($enroll->certificate->file_path) }}" 
+                            class="btn btn-dark btn-sm">
+                                <i class="bx bx-download me-1"></i> Download
+                            </a>
+                        </div>
+
                     </div>
-
-                    <div class="certificate-preview border rounded p-2 mb-3">
-                        <img src="https://dummyimage.com/600x400/e0e0e0/000&text=Certificate+Preview"
-                             class="img-fluid rounded" alt="">
-                    </div>
-
-                    <h6 class="fw-bold mb-1">
-                        Web Development Fundamentals
-                    </h6>
-
-                    <p class="text-muted small mb-2">
-                        Awarded on: March 08, 2025
-                    </p>
-
-                    <p class="small text-muted mb-3">
-                        Successfully completed course requirements and assessments.
-                    </p>
-
-                    <div class="d-flex justify-content-between">
-                        <button class="btn btn-outline-dark btn-sm">
-                            <i class="bx bx-show me-1"></i> View
-                        </button>
-                        <button class="btn btn-dark btn-sm">
-                            <i class="bx bx-download me-1"></i> Download
-                        </button>
-                    </div>
-
                 </div>
             </div>
-        </div>
+            @else
+                <div class="col-md-6 col-lg-4">
+                    <div class="card certificate-card shadow-sm border-0 h-100">
+                        <div class="card-body">
 
-        <!-- Earned Certificate -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card certificate-card shadow-sm border-0 h-100">
-                <div class="card-body">
+                            <div class="certificate-badge bg-warning-subtle text-warning mb-3">
+                                <i class="bx bx-time me-1"></i> In Progress
+                            </div>
 
-                    <div class="certificate-badge bg-success-subtle text-success mb-3">
-                        <i class="bx bx-check-circle me-1"></i> Earned
+                            <div class="certificate-preview border rounded p-2 mb-3 position-relative">
+                                <img src="https://dummyimage.com/600x400/f0f0f0/000&text=Locked+Certificate"
+                                    class="img-fluid rounded opacity-75"
+                                    draggable="false"
+                                    oncontextmenu="return false;">
+
+                                <span class="locked-overlay">
+                                    <i class="bx bx-lock-alt"></i>
+                                </span>
+                            </div>
+
+                            <h6 class="fw-bold mb-1">
+                                {{ $enroll->course->title }}
+                            </h6>
+
+                            <p class="text-muted small mb-2">
+                                Certificate will be available after completion
+                            </p>
+
+                            <p class="small text-muted">
+                                Progress: {{ $enroll->progress ?? 0 }}%
+                            </p>
+
+                            <a href="{{ route('user.courses.show', $enroll->course->id) }}" 
+                            class="btn btn-outline-dark btn-sm w-100">
+                                Continue Course
+                            </a>
+
+                        </div>
                     </div>
-
-                    <div class="certificate-preview border rounded p-2 mb-3">
-                        <img src="https://dummyimage.com/600x400/d9d9d9/000&text=Certificate+Preview"
-                             class="img-fluid rounded" alt="">
-                    </div>
-
-                    <h6 class="fw-bold mb-1">
-                        Data Analysis Essentials
-                    </h6>
-
-                    <p class="text-muted small mb-2">
-                        Awarded on: February 21, 2025
-                    </p>
-
-                    <p class="small text-muted mb-3">
-                        Demonstrated strong understanding of analytical techniques.
-                    </p>
-
-                    <div class="d-flex justify-content-between">
-                        <button class="btn btn-outline-dark btn-sm">
-                            <i class="bx bx-show me-1"></i> View
-                        </button>
-                        <button class="btn btn-dark btn-sm">
-                            <i class="bx bx-download me-1"></i> Download
-                        </button>
-                    </div>
-
                 </div>
+
+            @endif
+        @empty
+
+            <div class="col-12">
+                <p class="text-muted">You are not enrolled in any course yet.</p>
             </div>
-        </div>
 
-        <!-- Not Earned Yet -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card certificate-card shadow-sm border-0 h-100">
-                <div class="card-body">
-
-                    <div class="certificate-badge bg-warning-subtle text-warning mb-3">
-                        <i class="bx bx-time me-1"></i> In Progress
-                    </div>
-
-                    <div class="certificate-preview border rounded p-2 mb-3 position-relative">
-                        <img src="https://dummyimage.com/600x400/f0f0f0/000&text=Locked+Certificate"
-                             class="img-fluid rounded opacity-75" alt="">
-                        <span class="locked-overlay">
-                            <i class="bx bx-lock-alt"></i>
-                        </span>
-                    </div>
-
-                    <h6 class="fw-bold mb-1">
-                        Advanced Cybersecurity
-                    </h6>
-
-                    <p class="text-muted small mb-2">
-                        Certificate will be available after completion
-                    </p>
-
-                    <p class="small text-muted">
-                        Progress: 65%
-                    </p>
-
-                    <button class="btn btn-outline-dark btn-sm w-100">
-                        Continue Course
-                    </button>
-
-                </div>
-            </div>
-        </div>
-
+        @endforelse
     </div>
 
 </div>

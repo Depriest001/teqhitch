@@ -102,7 +102,7 @@ img {
 .header {
     padding: 20px 0;
     text-align: center;
-    background: linear-gradient(to bottom right, #12E4D2, #13328C, #B7FE5A);    
+    background: linear-gradient(135deg, #1E5FD8, #2EC4B6, #6BD66B);   
     border-radius: 5px 5px 0 0;
     width: 570px !important;
 }
@@ -247,7 +247,7 @@ img {
 
 .button-blue,
 .button-primary {
-    background: #13328C;
+    background: linear-gradient(135deg, #1E5FD8, #2EC4B6);
     border: none;
 }
 

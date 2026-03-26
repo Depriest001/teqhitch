@@ -15,7 +15,7 @@
     
     @if (session('success') || session('error') || $errors->any())
         <div id="appToast"
-            class="bs-toast toast fade show position-fixed bottom-0 end-0 m-3
+            class="bs-toast toast fade show position-fixed top-0 end-0 m-3
             {{ session('success') ? 'bg-success' : (session('error') ? 'bg-danger' : 'bg-warning') }}"
             role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
             <div class="toast-header text-white">
@@ -53,44 +53,81 @@
         <a href="{{ route('user.courses.enroll') }}" class="btn btn-primary rounded-pill px-4"><i class="bx bx-plus-circle me-1"></i> Enroll Course</a>
     </div>
     <div class="row g-4">
+    @forelse ($enrollments as $enrollment)
+        @php
+            $totalModules = $enrollment->course->modules->count();
+            $completedModules = $enrollment->moduleProgress->where('status', 'completed')->count();
 
-        @forelse ($enrollments as $enrollment)
-            <div class="col-md-4">
-                <div class="card h-100 course-card shadow-sm border-0">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $enrollment->course->title }}</h5>
+            $assignments = $enrollment->course->modules->flatMap(fn($module) => $module->assignments);
+            $totalAssignments = $assignments->count();
+            $gradedAssignments = $assignments->flatMap(fn($assignment) => 
+                $assignment->submissions->where('student_id', $enrollment->student_id)->whereNotNull('graded_at')
+            )->count();
+            // Calculate progress percentage
+            $moduleProgressPercent = $totalModules > 0 ? round(($completedModules / $totalModules) * 100) : 0;
+            $assignmentProgressPercent = $totalAssignments > 0 ? round(($gradedAssignments / $totalAssignments) * 100) : 0;
 
-                        <p class="card-text text-secondary">
-                            {{ Str::limit(strip_tags($enrollment->course->description), 120) ?? 'No description available' }}
-                        </p>
+            // Average progress (optional)
+            $progress = $totalModules + $totalAssignments > 0
+                ? round(($completedModules + $gradedAssignments) / ($totalModules + $totalAssignments) * 100)
+                : 0;
+        @endphp
 
-                        <div class="progress mb-2" style="height:6px;">
-                            <div
-                                class="progress-bar
-                                {{ $enrollment->progress < 50 ? 'bg-danger' :
-                                ($enrollment->progress < 80 ? 'bg-warning' : 'bg-success') }}"
-                                style="width: {{ $enrollment->progress }}%">
-                            </div>
+        <div class="col-md-4">
+            <div class="card h-100 course-card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title">{{ $enrollment->course->title }}</h5>
+
+                    <p class="card-text text-secondary">
+                        {{ Str::limit(strip_tags($enrollment->course->description), 120) ?? 'No description available' }}
+                    </p>
+
+                    <div class="progress mb-2" style="height:6px;">
+                        <div
+                            class="progress-bar
+                            {{ $progress < 50 ? 'bg-danger' :
+                            ($progress < 80 ? 'bg-warning' : 'bg-success') }}"
+                            style="width: {{ $progress }}%">
                         </div>
+                    </div>
 
-                        <small>{{ $enrollment->progress }}% Completed</small>
+                    <small>{{ $progress }}% Completed</small>
 
-                        <div class="mt-3">
-                            <a href="{{ route('user.courses.show', $enrollment->course->id) }}"
-                            class="btn btn-primary btn-sm">
-                                Continue
-                            </a>
-                        </div>
+                    <ul class="list-unstyled small mt-2 mb-2">
+                        <li>Modules Completed: {{ $completedModules }} / {{ $totalModules }}</li>
+                        <li>Assignments Graded: {{ $gradedAssignments }} / {{ $totalAssignments }}</li>
+                    </ul>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{{ route('user.courses.show', $enrollment->course->id) }}"
+                           class="btn btn-sm btn-primary">
+                            Continue
+                        </a>
+
+                        @if($totalModules === 0 && $totalAssignments === 0)
+                            <p class="text-muted mt-2">No content uploaded for this course yet.</p>
+
+                        @elseif(!is_null($enrollment->completed_at))
+                            <span class="badge bg-success mt-2">Course Completed</span>
+
+                        @elseif($completedModules === $totalModules && $gradedAssignments === $totalAssignments)
+                            <form action="{{ route('user.courses.complete', $enrollment->id) }}" method="POST" class="p-0 d-inline-block">
+                                @csrf
+                                <button class="btn btn-success btn-sm">
+                                    Complete Course
+                                </button>
+                            </form>
+                        @endif
                     </div>
                 </div>
             </div>
-        @empty
-            <div class="col-12 text-center">
-                <p class="text-muted">You have not enrolled in any course yet.</p>
-            </div>
-        @endforelse
-
-    </div>
+        </div>
+    @empty
+        <div class="col-12 text-center">
+            <p class="text-muted">You have not enrolled in any course yet.</p>
+        </div>
+    @endforelse
+</div>
 
 </div>
 

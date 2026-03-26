@@ -72,7 +72,7 @@ class AdminAnnouncementController extends Controller
         $validated = $request->validate([
             'title'     => 'required|string|max:255',
             'type'      => 'required|in:general,course,system',
-            'audience'  => 'required|in:students,instructors,admin',
+            'audience'  => 'required|in:students,instructors,everyone',
             'message'   => 'required|string',
             'status'    => 'required|in:published,draft,archived',
             'course_id' => 'nullable|exists:courses,id', // only required if type = course

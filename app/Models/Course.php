@@ -56,7 +56,7 @@ class Course extends Model
 
     protected static function generateUniqueSlug($title, $ignoreId = null)
     {
-        $slug = Str::slug($title);
+        $slug = Str::slug($title, '_');
         $originalSlug = $slug;
         $count = 1;
 
@@ -91,6 +91,14 @@ class Course extends Model
     
     public function enrollments() {
         return $this->hasMany(Enrollment::class);
+    }
+    
+    public function recentEnrollments()
+    {
+        return $this->hasMany(Enrollment::class)
+            ->where('status', 'active')
+            ->latest()
+            ->limit(10);
     }
 
     public function assignments()

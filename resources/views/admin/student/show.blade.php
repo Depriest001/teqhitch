@@ -7,7 +7,7 @@
     {{-- Toast Messages --}}
     @if (session('success') || session('error') || $errors->any())
         <div id="appToast"
-            class="bs-toast toast fade show position-fixed bottom-0 end-0 m-3
+            class="bs-toast toast fade show position-fixed top-0 end-0 m-3
             {{ session('success') ? 'bg-success' : (session('error') ? 'bg-danger' : 'bg-warning') }}"
             role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
             <div class="toast-header text-white">
@@ -49,7 +49,7 @@
         {{-- Profile Card --}}
         <div class="col-md-4">
             <div class="card shadow-sm p-3 text-center">
-                <img src="{{ asset('assets/img/user/icon-male.png') }}" class="rounded-circle mx-auto mb-3" width="130">
+                <img src="{{ $student->avatar ? asset('uploads/'.$student->avatar) : asset('dashboardassets/images/avatar/user.png') }}" class="rounded-circle mx-auto mb-3" width="100" height="100" alt="Profile Picture">
                 <h5 class="mb-0">{{ $student->name }}</h5>
                 <span class="text-muted">{{ $student->status }}</span>
 
@@ -107,11 +107,11 @@
             <div class="card shadow-sm p-3 mb-4">
                 <h5 class="fw-bold mb-3">Enrolled Courses</h5>
                 <ul class="list-group">
-                    @forelse($student->courses ?? [] as $course)
+                    @forelse($student->enrollments as $enroll)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ $course->title }}
-                            <span class="badge bg-{{ $course->status == 'Active' ? 'success' : 'warning' }}">
-                                {{ $course->status }}
+                            {{ $enroll->course->title }}
+                            <span class="badge bg-{{ $enroll->status == 'active' ? 'success' : 'warning' }}">
+                                {{ $enroll->status }}
                             </span>
                         </li>
                     @empty
@@ -124,9 +124,9 @@
             <div class="card shadow-sm p-3">
                 <h5 class="fw-bold mb-3">Recent Activities</h5>
                 <ul class="list-group">
-                    @forelse($student->activities ?? [] as $activity)
+                    @forelse($student->recentActivities as $activity)
                         <li class="list-group-item">
-                            {{ $activity->description }}
+                            {{ $activity->details['description'] }}
                             <span class="float-end text-muted">{{ $activity->created_at->diffForHumans() }}</span>
                         </li>
                     @empty

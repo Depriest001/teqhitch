@@ -3,7 +3,35 @@
 @section('content')
 
 <div class="container-xxl flex-grow-1 container-p-y">
+    
+    {{-- Notifications --}}
+    @if (session('success') || session('error') || $errors->any())
+        <div id="appToast"
+            class="bs-toast toast fade show position-fixed top-0 end-0 m-3
+            {{ session('success') ? 'bg-success' : (session('error') ? 'bg-danger' : 'bg-warning') }}"
+            role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
 
+            <div class="toast-header text-white">
+                <i class="icon-base bx bx-bell me-2"></i>
+                <div class="me-auto fw-medium">
+                    {{ session('success') ? 'Success' : (session('error') ? 'Error' : 'Validation') }}
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+
+            <div class="toast-body text-white">
+                @if (session('success')) {{ session('success') }}
+                @elseif (session('error')) {{ session('error') }}
+                @elseif ($errors->any())
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        </div>
+    @endif
     <!-- Page Header -->
     <div class="mb-4">
         <h4 class="fw-bold mb-0">Manage Assignments</h4>
@@ -81,7 +109,7 @@
 
                             <td>{{ $assignment->title }}</td>
 
-                            <td>{{ $assignment->course->title ?? 'N/A' }}</td>
+                            <td>{{ $assignment->module->course->title ?? 'N/A' }}</td>
 
                             <td>{{ \Carbon\Carbon::parse($assignment->deadline)->format('M d, Y') }}</td>
 

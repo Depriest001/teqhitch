@@ -34,4 +34,25 @@ class Enrollment extends Model
     {
         return $this->hasMany(ModuleProgress::class, 'enrollment_id');
     }
+
+    // Relationship: Enrollment has one certificate
+    public function certificate()
+    {
+        return $this->hasOne(Certificate::class);
+    }
+
+    public function getProgressAttribute()
+    {
+        $total = $this->course->modules()->count();
+
+        if ($total === 0) {
+            return 0;
+        }
+
+        $completed = $this->moduleProgress()
+            ->where('status', 'completed')
+            ->count();
+
+        return (int) round(($completed / $total) * 100);
+    }
 }

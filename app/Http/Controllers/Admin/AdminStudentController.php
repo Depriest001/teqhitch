@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\StudentProfile;
+use App\Models\Enrollment;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -16,6 +18,7 @@ class AdminStudentController extends Controller
     {
         $students = User::where('role', 'student')
             ->where('status', '!=', 'deleted')
+            ->withCount('enrollments')
             ->latest()
             ->get();
 
@@ -28,11 +31,15 @@ class AdminStudentController extends Controller
     }
 
     // Show a single student
-    public function show($id)
+    public function show($id) 
     {
         $student = User::where('role', 'student')
             ->where('status', '!=', 'deleted')
-            ->with('StudentProfile')
+            ->with([
+                'StudentProfile',
+                'enrollments',
+                'recentActivities' // 🔥 clean & reusable
+            ])
             ->findOrFail($id);
 
         return view('admin.student.show', compact('student'));

@@ -12,22 +12,27 @@ class StaffAssignmentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Assignment::with('course')
+        $query = Assignment::with(['module', 'module.course'])
             ->where('instructor_id', auth()->id());
 
-        // 🔎 Search by title or course name
+        // 🔎 Search by assignment title, module title, or course title
         if ($request->search) {
             $query->where(function($q) use ($request) {
-                $q->where('title', 'like', "%{$request->search}%")
-                ->orWhereHas('course', function($c) use ($request) {
-                    $c->where('title', 'like', "%{$request->search}%");
+                $q->where('title', 'like', "%{$request->search}%") // assignment title
+                ->orWhereHas('module', function($m) use ($request) {
+                    $m->where('title', 'like', "%{$request->search}%") // module title
+                        ->orWhereHas('course', function($c) use ($request) {
+                            $c->where('title', 'like', "%{$request->search}%"); // course title
+                        });
                 });
             });
         }
 
-        // 🎯 Filter by course
+        // 🎯 Filter by course through module
         if ($request->course_id) {
-            $query->where('course_id', $request->course_id);
+            $query->whereHas('module.course', function($c) use ($request) {
+                $c->where('id', $request->course_id);
+            });
         }
 
         // 🏷 Filter by status
@@ -55,52 +60,74 @@ class StaffAssignmentController extends Controller
 
         $assignments = $query->latest()->get();
 
+        // Courses for the instructor
         $courses = Course::where('instructor_id', auth()->id())->get();
 
         return view('staff.assignment.index', compact('assignments', 'courses'));
     }
 
-    public function edit() {
-        return view('staff.assignment.edit');
-    }
+    // public function edit() {
+    //     return view('staff.assignment.edit');
+    // }
 
-    public function storeAssignment(Request $request, Course $course)
+    public function store(Request $request)
     {
-        abort_if($course->instructor_id !== auth()->id(), 403);
+        $course = Course::findOrFail($request->input('course_id'));
 
+        // 2. Ensure the authenticated user owns the course
+        if ($course->instructor_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Validate the request
         $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'required|string',
+            'module_id'   => 'required|exists:course_modules,id', // <-- validate selected module
             'deadline'    => 'required|date|after:today',
             'max_score'   => 'required|integer|min:1',
         ]);
 
+        // Ensure the module belongs to this course
+        $module = $course->modules()->findOrFail($request->module_id);
+
+        // Create the assignment
         Assignment::create([
-            'course_id'     => $course->id,
+            'module_id'     => $module->id,           // use the selected module
             'instructor_id' => auth()->id(),
             'title'         => $request->title,
             'instructions'  => $request->description,
             'deadline'      => $request->deadline,
             'max_score'     => $request->max_score,
-            'status'        => '',
+            'status'        => '',                     // or 'pending'
         ]);
 
-        return back()->with('success','Assignment created successfully');
+        activity_log(
+            'update_lesson',
+            'lessons',
+            [
+                'course_id' => $module->course_id,
+                'status' => 'success',
+                'description' => 'Instructor created an Assignment'
+            ]
+        );
+
+        return back()->with('success', 'Assignment created successfully');
     }
     
     public function show(Assignment $assignment)
     {
-        abort_if($assignment->instructor_id !== auth()->id(), 403);
+        // Ensure instructor owns the assignment via its course module → course
+        abort_if($assignment->Module->course->instructor_id !== auth()->id(), 403);
 
-        $assignment->load(['course.students', 'submissions.student']);
+        // Load relations
+        $assignment->load(['module.course', 'submissions.student']);
 
         $submitted = 0;
         $late = 0;
 
         foreach ($assignment->submissions as $submission) {
             if ($submission->submitted_at) {
-
-                // If submitted after deadline → late
                 if ($submission->submitted_at > $assignment->deadline) {
                     $late++;
                 } else {
@@ -109,13 +136,14 @@ class StaffAssignmentController extends Controller
             }
         }
 
-        // Pending = Students without submission
-        $totalStudents = $assignment->course->students->count();
+        // Pending = students without submission
+        $totalStudents = $assignment->module->course->students->count();
         $pending = $totalStudents - ($submitted + $late);
 
         return view('staff.assignment.show', [
             'assignment' => $assignment,
-            'course' => $assignment->course,
+            'module' => $assignment->module,
+            'course' => $assignment->module->course,
             'submissions' => $assignment->submissions,
             'stats' => [
                 'submitted' => $submitted,
@@ -172,8 +200,19 @@ class StaffAssignmentController extends Controller
             'graded_at' => now(),
         ]);
 
-        return back()->with('success', 'Grade submitted successfully.');
-    }
+        activity_log(
+            'grade_assignment',
+            'assignments',
+            [
+                'assignment_id' => $assignment->id,
+                'student_id' => $submission->student_id,
+                'status' => 'success',
+                'description' => 'Instructor graded assignment'
+            ]
+        );
 
+        return redirect()->route('staff.assignment.show', $assignment->id)
+            ->with('success', 'Grade submitted successfully.');
+    }
 
 }

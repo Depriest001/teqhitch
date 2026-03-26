@@ -100,7 +100,7 @@
                         <td>{{ $loop->iteration }}</td>
 
                         <td>
-                            <img src="{{ $course->thumbnail ? asset('uploads/'.$course->thumbnail) : '' }}" 
+                            <img src="{{ $course->thumbnail ? asset('uploads/'.$course->thumbnail) : asset('dashboardassets/images/avatar/user.png') }}" 
                                 width="40" height="40" class="rounded">
                         </td>
 

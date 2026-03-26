@@ -99,7 +99,10 @@
                             <small>Modules</small>
                         </div>
                         <div class="col-4">
-                            <h6 class="mb-0">{{ $course->assignments_count }}</h6>
+                            @php
+                                $totalAssignments = $course->modules->sum('assignments_count');
+                            @endphp
+                            <h6 class="mb-0">{{ $totalAssignments }}</h6>
                             <small>Assignments</small>
                         </div>
                     </div>

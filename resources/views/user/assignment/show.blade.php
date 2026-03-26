@@ -27,7 +27,7 @@
         <div class="col-lg-8">
             <h4 class="fw-bold mb-1">{{ $assignment->title }}</h4>
             <p class="mb-0 opacity-75">
-                {{ $assignment->course->title }}
+                {{ $assignment->module->course->title }}
             </p>
         </div>
         <div class="">
@@ -83,7 +83,7 @@
                 @if(!$submission)
                     <!-- NOT SUBMITTED -->
                     <p class="text-muted">
-                        You haven’t submitted this assignment yet.
+                        You haven't submitted this assignment yet.
                     </p>
 
                     @if(now()->lte($assignment->deadline))
@@ -111,7 +111,7 @@
                         </small>
                     </div>
 
-                    <a href="{{ asset('storage/'.$submission->file_path) }}"
+                    <a href="{{ asset('uploads/'.$submission->file_path) }}"
                        target="_blank"
                        class="btn btn-outline-primary btn-sm rounded-pill">
                         Download File
@@ -153,6 +153,7 @@
                 <input type="file"
                        class="form-control"
                        name="file"
+                        accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,text/plain" 
                        required>
                 <small class="text-muted">
                     Accepted formats: PDF, DOCX, ZIP

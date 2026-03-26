@@ -58,7 +58,7 @@
                     </div>
 
                     <div>
-                        <button class="btn btn-dark btn-sm mb-2 mb-md-0" data-bs-toggle="offcanvas" data-bs-target="#addModuleCanvas">
+                        <button class="btn btn-dark btn-sm" data-bs-toggle="offcanvas" data-bs-target="#addModuleCanvas">
                             <i class="bx bx-plus-circle me-1"></i> Add Module
                         </button>                        
 
@@ -124,7 +124,7 @@
                                         </small>
                                     </div>
 
-                                    <a href="{{ Storage::url($module->file_path) }}" target="_blank" class="btn btn-outline-dark btn-sm mt-2 mt-md-0">
+                                    <a href="{{ asset('uploads/' . $module->file_path) }}" target="_blank" class="btn btn-outline-dark btn-sm mt-2 mt-md-0">
                                         View
                                     </a>
                                 </div>
@@ -247,8 +247,9 @@
 
     <div class="offcanvas-body">
 
-        <form action="{{ route('staff.course.assignment.store', $course->id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('staff.assignment.store') }}" method="POST">
             @csrf
+            <input type="hidden" name="course_id" value="{{ $course->id }}">
 
             <div class="mb-3">
                 <label for="assignmentTitle" class="form-label">Assignment Title</label>
@@ -258,6 +259,16 @@
             <div class="mb-3">
                 <label for="assignmentDescription" class="form-label">Description</label>
                 <textarea class="form-control" id="assignmentDescription" name="description" rows="4" placeholder="Enter description" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="moduleSelect" class="form-label">Select Module</label>
+                <select name="module_id" id="moduleSelect" class="form-select" required>
+                    <option value="">-- Select Module --</option>
+                    @foreach($course->modules as $module)
+                        <option value="{{ $module->id }}">{{ $module->title }}</option>
+                    @endforeach
+                </select>
             </div>
 
             <div class="mb-3">
@@ -274,7 +285,6 @@
                 <i class="bx bx-plus-circle me-1"></i> Create Assignment
             </button>
         </form>
-
 
     </div>
 </div>

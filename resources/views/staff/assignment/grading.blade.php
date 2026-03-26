@@ -60,21 +60,21 @@
 
                     <div class="border rounded overflow-hidden mb-4" style="height: 450px;">
                         @if($submission->file_path)
-                            <iframe
-                                src="{{ asset('storage/' . $submission->file_path) }}"
+                           <iframe
+                                src="https://docs.google.com/gview?url={{ urlencode(asset('uploads/' . $submission->file_path)) }}&embedded=true"
                                 width="100%"
                                 height="100%"
-                                style="border:0;"
-                            ></iframe>
-
-                            <div class="text-end mt-3">
-                                <a href="{{ asset('storage/' . $submission->file_path) }}"
-                                target="_blank"
-                                class="btn btn-outline-primary">
-                                    <i class="bx bx-download"></i> Download File
-                                </a>
-                            </div>
+                                style="border:0;">
+                            </iframe>
+                            
                         @endif
+                    </div>
+                    <div class="text-end mt-3">
+                        <a href="{{ asset('uploads/' . $submission->file_path) }}"
+                        target="_blank"
+                        class="btn btn-outline-primary">
+                            <i class="bx bx-download"></i> Download File
+                        </a>
                     </div>
 
                     <!-- Grading Section -->

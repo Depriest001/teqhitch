@@ -29,6 +29,16 @@ class ModuleProgressController extends Controller
             ]
         );
 
+        activity_log(
+            'lesson_completed',
+            'lessons',
+            [
+                'lesson_id' => $module->id,
+                'status' => 'success',
+                'description' => 'You completed module lesson'
+            ]
+        );
+
         return redirect()
             ->back()
             ->with('success', 'Module marked as completed.');

@@ -146,7 +146,28 @@
                 </div>
 
                 <div class="card-body">
-                    <p class="text-muted">Activity logs coming soon...</p>
+                    <div class="card-body p-0">
+                        @forelse($activities as $log)
+                           
+                            <div class="timeline-item mb-4 d-flex">
+                                <div class="me-3">
+                                    <span class="badge bg-primary rounded-circle p-3">
+                                        <i class="bx bx-task"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">{{ $log->action }}</h6>
+                                    @if(!empty($log->details['description']))
+                                        <p class="text-muted small mb-1">{{ $log->details['description'] }}</p>
+                                    @endif
+                                    <span class="badge bg-light text-dark">{{ ucfirst($log->module) }}</span>
+                                    <span class="text-muted small ms-2">{{ $log->created_at->diffForHumans() }}</span>
+                                </div>
+                            </div>
+                        @empty
+                            <small class="text-muted">No recent activities</small>
+                        @endforelse
+                    </div>
                 </div>
             </div>
 

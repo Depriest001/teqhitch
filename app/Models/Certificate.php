@@ -10,11 +10,12 @@ class Certificate extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id',
-        'course_id',
+        'enrollment_id',
         'certificate_code',
+        'thumbnail',
         'file_path',
         'issued_at',
+        'delete_status',
     ];
 
     protected $casts = [
@@ -22,14 +23,13 @@ class Certificate extends Model
     ];
 
     // Relationship: Certificate belongs to a student
-    public function student()
+    public function enrollment()
     {
-        return $this->belongsTo(User::class, 'student_id');
+        return $this->belongsTo(Enrollment::class);
     }
-
-    // Relationship: Certificate belongs to a course
-    public function course()
+    
+    public function getRouteKeyName()
     {
-        return $this->belongsTo(Course::class, 'course_id');
+        return 'certificate_code';
     }
 }

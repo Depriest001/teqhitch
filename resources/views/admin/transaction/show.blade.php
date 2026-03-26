@@ -29,7 +29,7 @@
                     <h4 class="fw-bold">{{ $transaction->meta['id'] ?? 'N/A' }}</h4>
 
                     <!-- Reference -->
-                    <span class="badge bg-label-primary mb-2">
+                    <span class="badge bg-label-primary mb-2 text-wrap">
                         Ref: {{ $transaction->reference ?? 'N/A' }}
                     </span>
 
@@ -87,8 +87,8 @@
                 <div class="card-body text-center">
 
                     <div class="mb-3">
-                        <img src="{{ $transaction->student->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($transaction->student->name ?? 'Student') }}"
-                             class="rounded-circle" width="90">
+                        <img src="{{ $transaction->student->avatar ? asset('uploads/'.$transaction->student->avatar) : 'https://ui-avatars.com/api/?name='.urlencode($transaction->student->name) }}"
+                             class="rounded-circle" width="100" height="100">
                     </div>
 
                     <h5 class="fw-bold mb-0">{{ $transaction->student->name ?? 'N/A' }}</h5>
@@ -147,7 +147,7 @@
                     <p class="mb-0">
                         <i class="bx bx-calendar me-1"></i>
                         Course Starts:
-                        <strong>{{ $transaction->course->start_date ?? '---' }}</strong>
+                        <strong>{{ $transaction->paid_at ?? '---' }}</strong>
                     </p>
 
                 </div>

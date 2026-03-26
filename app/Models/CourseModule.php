@@ -26,4 +26,9 @@ class CourseModule extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
+    
+    public function assignments()
+    {
+        return $this->hasMany(Assignment::class, 'module_id');
+    }
 }

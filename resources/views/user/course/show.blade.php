@@ -27,10 +27,10 @@
 
         <div class="progress rounded-pill" style="height:12px;">
             <div class="progress-bar"
-                style="width: {{ $progress }}%; background: linear-gradient(90deg,#0ea5e9,#2563eb);">
+                style="width: {{ $enrollment->progress }}%; background: linear-gradient(90deg,#0ea5e9,#2563eb);">
             </div>
         </div>
-        <small class="text-muted">{{ $progress }}% Completed</small>
+        <small class="text-muted">{{ $enrollment->progress }}% Completed</small>
     </div>
 
     <div class="row g-4">
@@ -97,7 +97,7 @@
                             {{-- PDF --}}
                             @case('pdf')
                                 <iframe
-                                    src="{{ asset('storage/' . $currentModule->file_path) }}"
+                                    src="{{ asset('uploads/' . $currentModule->file_path) }}"
                                     width="100%"
                                     height="600"
                                     style="border:none;">
@@ -108,7 +108,7 @@
                             @case('docx')
                             @case('ppt')
                                 <iframe
-                                    src="https://docs.google.com/gview?url={{ asset('storage/' . $currentModule->file_path) }}&embedded=true"
+                                    src="https://docs.google.com/gview?url={{ asset('uploads/' . $currentModule->file_path) }}&embedded=true"
                                     width="100%"
                                     height="600"
                                     style="border:none;">
@@ -122,7 +122,7 @@
                                     This lesson contains downloadable resources.
                                 </div>
 
-                                <a href="{{ asset('storage/' . $currentModule->file_path) }}"
+                                <a href="{{ asset('uploads/' . $currentModule->file_path) }}"
                                 class="btn btn-primary">
                                     Download Resources
                                 </a>

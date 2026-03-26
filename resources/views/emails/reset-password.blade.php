@@ -21,7 +21,7 @@ Reset Password
     We look forward to supporting your success.
 </p>
 <hr>
-<p>
+<p style="margin-top: 10px;">
     Best Regards,<br>
     <strong>{{ config('app.name') }} Team</strong> <br>
     Online Courses | Seminars | Project Writing <br>

@@ -9,80 +9,108 @@
             <h4 class="fw-bold mb-1">Activities</h4>
             <p class="text-muted mb-0">Track your learning journey, submissions and achievements</p>
         </div>
-        <button class="btn btn-dark btn-sm">
+        <button class="btn btn-dark btn-sm" onclick="window.location.reload()">
             <i class="bx bx-refresh me-1"></i> Refresh
         </button>
     </div>
 
-    <!-- Filters -->
-    <div class="mb-4">
-        <ul class="nav nav-pills flex-nowrap overflow-auto">
-            <li class="nav-item">
-                <a class="nav-link active" href="#">All</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Assignments</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Courses</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Certificates</a>
-            </li>
-        </ul>
-    </div>
-
     <!-- Timeline -->
     <div class="card border-0 shadow-sm">
+        <div class="mt-4 d-flex justify-content-center">
+            {{ $activities->links() }}
+        </div>
+
         <div class="card-body">
 
-            <!-- Today -->
-            <h6 class="text-uppercase text-muted small mb-3">Today</h6>
+            @php
+                use Carbon\Carbon;
+                $today = Carbon::today();
+                $currentWeekStart = Carbon::now()->startOfWeek();
+                $currentWeekEnd = Carbon::now()->endOfWeek();
+            @endphp
 
-            <div class="timeline-item mb-4 d-flex">
-                <div class="me-3">
-                    <span class="badge bg-primary rounded-circle p-3">
-                        <i class="bx bx-book-open"></i>
-                    </span>
-                </div>
-                <div>
-                    <h6 class="mb-1">You continued “Web Development Fundamentals”</h6>
-                    <p class="text-muted small mb-1">Progress updated to 65%</p>
-                    <span class="badge bg-light text-dark">Course</span>
-                    <span class="text-muted small ms-2">2 mins ago</span>
-                </div>
-            </div>
+            @php
+                $todayActivities = [];
+                $weekActivities = [];
+                $olderActivities = [];
 
-            <div class="timeline-item mb-4 d-flex">
-                <div class="me-3">
-                    <span class="badge bg-success rounded-circle p-3">
-                        <i class="bx bx-upload"></i>
-                    </span>
-                </div>
-                <div>
-                    <h6 class="mb-1">Assignment Submitted</h6>
-                    <p class="text-muted small mb-1">Intro to HTML — Assignment 1</p>
-                    <span class="badge bg-light text-dark">Assignment</span>
-                    <span class="text-muted small ms-2">1 hr ago</span>
-                </div>
-            </div>
+                foreach ($activities as $activity) {
+                    $created = Carbon::parse($activity->created_at);
+                    if ($created->isToday()) {
+                        $todayActivities[] = $activity;
+                    } elseif ($created->between($currentWeekStart, $currentWeekEnd)) {
+                        $weekActivities[] = $activity;
+                    } else {
+                        $olderActivities[] = $activity;
+                    }
+                }
+            @endphp
 
-            <!-- This Week -->
-            <h6 class="text-uppercase text-muted small mb-3 mt-4">This Week</h6>
+            {{-- Today --}}
+            @if(count($todayActivities))
+                <h6 class="text-uppercase text-muted small mb-3">Today</h6>
+                @foreach($todayActivities as $activity)
+                    <div class="timeline-item mb-4 d-flex">
+                        <div class="me-3">
+                            <span class="badge {{ $activity->badge_color ?? 'bg-primary' }} rounded-circle p-3">
+                                <i class="bx {{ $activity->icon ?? 'bx-task' }}"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">{{ $activity->action }}</h6>
+                            @if(!empty($activity->details['description']))
+                                <p class="text-muted small mb-1">{{ $activity->details['description'] }}</p>
+                            @endif
+                            <span class="badge bg-light text-dark">{{ ucfirst($activity->module) }}</span>
+                            <span class="text-muted small ms-2">{{ $activity->created_at->diffForHumans() }}</span>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
 
-            <div class="timeline-item mb-4 d-flex">
-                <div class="me-3">
-                    <span class="badge bg-warning rounded-circle p-3">
-                        <i class="bx bx-award"></i>
-                    </span>
-                </div>
-                <div>
-                    <h6 class="mb-1">You earned a Certificate</h6>
-                    <p class="text-muted small mb-1">UI/UX Beginner Track</p>
-                    <span class="badge bg-light text-dark">Achievement</span>
-                    <span class="text-muted small ms-2">3 days ago</span>
-                </div>
-            </div>
+            {{-- This Week --}}
+            @if(count($weekActivities))
+                <h6 class="text-uppercase text-muted small mb-3 mt-4">This Week</h6>
+                @foreach($weekActivities as $activity)
+                    <div class="timeline-item mb-4 d-flex">
+                        <div class="me-3">
+                            <span class="badge {{ $activity->badge_color ?? 'bg-warning' }} rounded-circle p-3">
+                                <i class="bx {{ $activity->icon ?? 'bx-award' }}"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">{{ $activity->action }}</h6>
+                            @if(!empty($activity->details['description']))
+                                <p class="text-muted small mb-1">{{ $activity->details['description'] }}</p>
+                            @endif
+                            <span class="badge bg-light text-dark">{{ ucfirst($activity->module) }}</span>
+                            <span class="text-muted small ms-2">{{ $activity->created_at->diffForHumans() }}</span>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
+
+            {{-- Older --}}
+            @if(count($olderActivities))
+                <h6 class="text-uppercase text-muted small mb-3 mt-4">Earlier</h6>
+                @foreach($olderActivities as $activity)
+                    <div class="timeline-item mb-4 d-flex">
+                        <div class="me-3">
+                            <span class="badge {{ $activity->badge_color ?? 'bg-secondary' }} rounded-circle p-3">
+                                <i class="bx {{ $activity->icon ?? 'bx-time' }}"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">{{ $activity->action }}</h6>
+                            @if(!empty($activity->details['description']))
+                                <p class="text-muted small mb-1">{{ $activity->details['description'] }}</p>
+                            @endif
+                            <span class="badge bg-light text-dark">{{ ucfirst($activity->module) }}</span>
+                            <span class="text-muted small ms-2">{{ $activity->created_at->diffForHumans() }}</span>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
 
         </div>
     </div>

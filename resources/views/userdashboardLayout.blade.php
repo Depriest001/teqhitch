@@ -13,6 +13,7 @@
     <!-- Favicon -->
     @php
       $favicon = $globalSetting->favicon ?? null;
+      $profile = auth()->user()->avatar ?? null;
     @endphp
 
     <link rel="icon"
@@ -84,7 +85,7 @@
                       href="javascript:void(0);"
                       data-bs-toggle="dropdown">
                       <div class="avatar avatar-online">
-                        <img src="{{ asset('dashboardassets/images/avatar/user.png')}}" alt class="w-px-40 h-auto rounded-circle border" />
+                        <img src="{{ $profile ? asset('uploads/'.$profile) : asset('dashboardassets/images/avatar/user.png') }}" alt class="w-px-40 rounded-circle border" />
                       </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -93,7 +94,7 @@
                           <div class="d-flex">
                             <div class="flex-shrink-0 me-3">
                               <div class="avatar avatar-online">
-                                <img src="{{ asset('dashboardassets/images/avatar/user.png')}}" alt class="w-px-40 h-auto rounded-circle border" />
+                                <img src="{{ $profile ? asset('uploads/'.$profile) : asset('dashboardassets/images/avatar/user.png') }}" alt class="w-px-40 rounded-circle border" />
                               </div>
                             </div>
                             <div class="flex-grow-1">
@@ -107,7 +108,7 @@
                         <div class="dropdown-divider my-1"></div>
                       </li>
                       <li>
-                        <a class="dropdown-item" href="">
+                        <a class="dropdown-item" href="{{ route('user.profile')}}">
                           <i class="icon-base bx bx-user icon-md me-3"></i><span>My Profile</span>
                         </a>
                       </li>

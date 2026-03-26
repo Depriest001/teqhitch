@@ -80,8 +80,8 @@
                 <div class="card-body">
                     @forelse($activities as $log)
                         <div class="d-flex align-items-start mb-3">
-                            <span class="badge bg-dark p-2 me-3">
-                                <i class="bx bx-activity"></i>
+                            <span class="badge bg-dark p-1 me-3">
+                                <i class="bx bx-calendar-event"></i>
                             </span>
                             <div>
                                 <p class="mb-1 fw-bold small">

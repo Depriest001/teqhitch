@@ -16,25 +16,50 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $enrollments = Enrollment::with(['course', 'moduleProgress.module'])
-            ->where('student_id', Auth::id())
-            ->get()
-            ->map(function ($enrollment) {
+        $userId = auth()->id();
 
-                $totalModules = $enrollment->course->modules->count();
+        $enrollments = Enrollment::with([
+            'course.modules.assignments',   // eager load assignments via modules
+            'moduleProgress.module'
+        ])
+        ->where('student_id', $userId)
+        ->get()
+        ->map(function ($enrollment) use ($userId) {
 
-                $completedModules = ModuleProgress::where('enrollment_id', $enrollment->id)
-                    ->where('status', 'completed')
-                    ->count();
+            $courseModules = $enrollment->course->modules;
 
-                $progress = $totalModules > 0
-                    ? round(($completedModules / $totalModules) * 100)
-                    : 0;
+            // Total modules in the course
+            $totalModules = $courseModules->count();
 
-                $enrollment->progress = $progress;
+            // Completed modules for this enrollment
+            $completedModules = $enrollment->moduleProgress->where('status', 'completed')->count();
 
-                return $enrollment;
-            });
+            $allModulesCompleted = $totalModules > 0 ? $completedModules === $totalModules : false;
+
+            // Assignments via modules
+            $assignments = $courseModules->flatMap(fn($module) => $module->assignments);
+
+            $allAssignmentsGraded = $assignments->count() > 0
+                ? $assignments->every(function ($assignment) use ($userId) {
+                    return $assignment->submissions
+                        ->where('student_id', $userId)
+                        ->whereNotNull('graded_at')
+                        ->isNotEmpty();
+                })
+                : false; // ✅ if no assignments → NOT complete
+
+            // Only mark complete if there’s at least one module or assignment
+            // $enrollment->isComplete = ($totalModules > 0 || $assignments->count() > 0)
+            //     && $allModulesCompleted
+            //     && $allAssignmentsGraded;
+            // $enrollment->isComplete =
+            //     $totalModules > 0 &&
+            //     $assignments->count() > 0 &&
+            //     $allModulesCompleted &&
+            //     $allAssignmentsGraded;
+
+            return $enrollment;
+        });
 
         return view('user.course.index', compact('enrollments'));
     }
@@ -56,14 +81,26 @@ class CourseController extends Controller
             return redirect()->back()->with('info', 'You are already enrolled in this course.');
         }
 
+        return view('user.course.buy_course', compact('course', 'student'));
+    }
+
+    public function initialize(Request $request, Course $course)
+    {
+        $user = auth()->user();
+
+        // Calculate fee
+        $flutterwaveFee = ($course->price * 0.014) + 50;
+        $totalAmount = round($course->price + $flutterwaveFee, 2);
+
+        // Generate unique reference
         do {
-            $tx_ref = "Tx" . Str::uuid()->getHex();
+            $tx_ref = "Tx" . Str::uuid()->toHex();
         } while (Payment::where('reference', $tx_ref)->exists());
 
-        // Retry-safe payment creation
-        $payment = Payment::updateOrCreate(
+        // Create or update payment
+        Payment::updateOrCreate(
             [
-                'student_id' => $student->id,
+                'student_id' => $user->id,
                 'course_id'  => $course->id,
             ],
             [
@@ -74,7 +111,10 @@ class CourseController extends Controller
             ]
         );
 
-        return view('user.course.buy_course', compact('course', 'student', 'tx_ref'));
+        return response()->json([
+            'tx_ref' => $tx_ref,
+            'amount' => $totalAmount,
+        ]);
     }
     
     public function callback(Request $request)
@@ -119,6 +159,16 @@ class CourseController extends Controller
                 [
                     'status'      => 'active',
                     'enrolled_at' => now(),
+                ]
+            );
+
+             activity_log(
+                'course_enrolled',
+                'courses',
+                [
+                    'course_id' => $payment->course_id,
+                    'status' => 'success',
+                    'description' => 'User enrolled in course successfully'
                 ]
             );
 
@@ -196,7 +246,6 @@ class CourseController extends Controller
     {
         $user = auth()->user();
 
-        // Ensure user is enrolled
         $enrollment = Enrollment::where('student_id', $user->id)
             ->where('course_id', $course->id)
             ->with([
@@ -217,23 +266,92 @@ class CourseController extends Controller
             return back()->with('error', 'This course has no modules yet.');
         }
 
-        // Progress calculation
-        $total = $modules->count();
-        $completed = $enrollment->moduleProgress
-            ->where('status', 'completed')
-            ->count();
-
-        $progress = round(($completed / $total) * 100);
-
         $currentModule = $this->resolveCurrentModule($request, $modules, $enrollment);
 
         return view('user.course.show', compact(
             'course',
             'modules',
             'enrollment',
-            'progress',
             'currentModule'
         ));
+    }
+
+    protected function resolveCurrentModule(Request $request, $modules, $enrollment)
+    {
+        // Example: return the first incomplete module
+        foreach ($modules as $module) {
+            $progress = $enrollment->moduleProgress
+                ->where('module_id', $module->id)
+                ->first();
+
+            if (!$progress || $progress->status !== 'completed') {
+                return $module;
+            }
+        }
+
+        // If all completed, return last module
+        return $modules->last();
+    }
+
+    public function completeCourse($enrollmentId)
+    {
+        $userId = auth()->id();
+
+        // Get enrollment (secure: must belong to logged-in user)
+        $enrollment = Enrollment::with([
+            'course.modules.assignments.submissions',
+            'moduleProgress'
+        ])
+        ->where('id', $enrollmentId)
+        ->where('student_id', $userId)
+        ->firstOrFail();
+
+        $modules = $enrollment->course->modules;
+
+        // ===== MODULES =====
+        $totalModules = $modules->count();
+        $completedModules = $enrollment->moduleProgress
+            ->where('status', 'completed')
+            ->count();
+
+        $allModulesCompleted = $totalModules > 0 && $completedModules === $totalModules;
+
+        // ===== ASSIGNMENTS =====
+        $assignments = $modules->flatMap(fn($module) => $module->assignments);
+        $totalAssignments = $assignments->count();
+
+        $allAssignmentsGraded = $totalAssignments > 0 && $assignments->every(function ($assignment) use ($userId) {
+            return $assignment->submissions
+                ->where('student_id', $userId)
+                ->whereNotNull('graded_at')
+                ->isNotEmpty();
+        });
+
+        // ===== VALIDATION =====
+        if (!$allModulesCompleted || !$allAssignmentsGraded) {
+            return back()->with('error', 'You must complete all modules and have all assignments graded first.');
+        }
+
+        // Prevent double completion
+        if (!is_null($enrollment->completed_at)) {
+            return back()->with('info', 'Course already completed.');
+        }
+
+        // ===== MARK COMPLETE =====
+        $enrollment->completed_at = now();
+        $enrollment->save();
+
+        activity_log(
+            'course_completed',
+            'courses',
+            [
+                'course_id' => $enrollment->course_id,
+                'status' => 'success',
+                'description' => 'User completed the course successfully'
+            ]
+        );
+
+        return back()->with('success', '🎉 Course marked as completed successfully!');
     }
 }
 

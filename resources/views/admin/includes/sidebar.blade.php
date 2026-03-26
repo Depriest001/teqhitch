@@ -48,7 +48,7 @@
 
         <li class="menu-item {{ request()->routeIs('admin.student.*') ? 'active' : '' }}">
             <a href="{{ route('admin.student.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-user"></i>
+                <i class="menu-icon tf-icons bx bx-group"></i>
                 <div class="text-truncate">Students</div>
             </a>
         </li>
@@ -57,6 +57,13 @@
             <a href="{{ route('admin.instructor.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-user-voice"></i>
                 <div class="text-truncate">Instructors</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.certificates.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-award"></i>
+                <div class="text-truncate">Certificates</div>
             </a>
         </li>
 
@@ -85,6 +92,13 @@
             <a href="{{ route('admin.announcement.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-bell"></i>
                 <div class="text-truncate"> Announcement</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.newsletter.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.newsletter.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div class="text-truncate"> Newsletters</div>
             </a>
         </li>
 

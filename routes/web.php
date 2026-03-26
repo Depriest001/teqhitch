@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\View\ViewController;
+use App\Http\Controllers\View\SubscriberController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\AuthController\AuthController;
@@ -12,6 +13,7 @@ use App\Http\Middleware\CheckInstructor;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminCoursesController;
+use App\Http\Controllers\Admin\AdminCertificateController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminInstructorController;
 use App\Http\Controllers\Admin\AdminTransactionController;
@@ -21,12 +23,15 @@ use App\Http\Controllers\Admin\SystemSettingController;
 use App\Http\Controllers\Admin\TopicController; 
 use App\Http\Controllers\Admin\PapersController;
 use App\Http\Controllers\Admin\TopicPaymentController;
+use App\Http\Controllers\Admin\NewslettersController;
+
 // staff
 use App\Http\Controllers\Staff\StaffDashboardController;
 use App\Http\Controllers\Staff\StaffCourseController;
 use App\Http\Controllers\Staff\StaffStudentController;
 use App\Http\Controllers\Staff\StaffAssignmentController;
 use App\Http\Controllers\Staff\StaffAnnouncementController;
+
 // student
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\CourseController;
@@ -46,6 +51,23 @@ Route::controller(\App\Http\Controllers\View\ViewController::class)->group(funct
     Route::get('/contact', 'contact')->name('contact');
     Route::get('/services', 'services')->name('services');
     Route::get('/services/{slug}', 'serviceDetail')->name('service.show');
+});
+
+// subscriber
+Route::post('/subscribe', [SubscriberController::class, 'store'])->name('subscriber.store');
+Route::get('/verify/{token}', [SubscriberController::class, 'verify'])->name('subscriber.verify');
+Route::get('/unsubscribe/{email}', [SubscriberController::class, 'unsubscribe'])->name('subscriber.unsubscribe');
+Route::get('/thank-you', function () {
+    if (!session()->has('message')) {
+        return redirect('/');
+    }
+    return view('thank-you');
+});
+Route::get('/unsubscribe', function () {
+    if (!session()->has('message')) {
+        return redirect('/');
+    }
+    return view('unsubscribe');
 });
 
 // Flutterwave webhook (topic payment)
@@ -137,7 +159,7 @@ Route::prefix('admin')
         // Suspensions
         Route::patch('admins/{admin}/suspend', [AdminController::class, 'suspend'])->name('admins.suspend');
         Route::patch('instructors/{instructor}/suspend', [AdminInstructorController::class, 'suspend'])->name('instructors.suspend');
-        Route::patch('students/{student}/suspend', [AdminStudentController::class, 'suspend'])->name('students.suspend');
+        Route::patch('students/{student}/suspend', [AdminStudentController::class, 'suspend'])->name('student.suspend');
 
         // Courses
         Route::patch('courses/{course}/toggle-status', [AdminCoursesController::class, 'toggleStatus'])
@@ -173,15 +195,26 @@ Route::prefix('admin')
         Route::delete('topic-payment/{id}', [TopicPaymentController::class, 'paymentDestroy'])
             ->name('topic-payment.destroy');
 
+        Route::get('certificates/generate-code', [AdminCertificateController::class, 'generateCode'])
+            ->name('certificates.generate_code');
+
+        Route::patch('certificates/{certificate}/soft-delete', [AdminCertificateController::class, 'softDelete'])
+            ->name('certificates.softDelete');
+
+        Route::get('newsletter/{newsletter}/send', [NewslettersController::class, 'send'])
+            ->name('newsletter.send');
+            
         // Resources
         Route::resources([
             'admins' => AdminController::class,
             'courses' => AdminCoursesController::class,
+            'certificates' => AdminCertificateController::class,
             'student' => AdminStudentController::class,
             'instructor' => AdminInstructorController::class,
             'transaction' => AdminTransactionController::class,
             'announcement' => AdminAnnouncementController::class,
             'topics' => TopicController::class,
+            'newsletter' => NewslettersController::class,
         ]);
     });
 
@@ -206,6 +239,8 @@ Route::prefix('staff')
 
         Route::get('announcement/view', [StaffAnnouncementController::class, 'view'])
             ->name('announcement.view');
+            
+        Route::get('activities', [StaffDashboardController::class, 'activities'])->name('activities');
 
         // Modules
         Route::post('course/{course}/module', [StaffCourseController::class, 'storemodule'])
@@ -264,6 +299,9 @@ Route::prefix('user')
         Route::get('course/{course}/buy', [CourseController::class, 'buyCourse'])
             ->name('course.buy');
 
+        Route::post('/course/{course}/initialize', [CourseController::class, 'initialize'])
+            ->name('course.initialize');
+
         Route::get('course/{course}/callback', [CourseController::class, 'callback'])
             ->name('course.callback');
 
@@ -273,6 +311,9 @@ Route::prefix('user')
         Route::post('module/{module}/complete',
             [ModuleProgressController::class, 'complete'])
             ->name('module.complete');
+        
+        Route::post('user/enrollment/{enrollment}/complete', [CourseController::class, 'completeCourse'])
+            ->name('courses.complete');
 
         // Announcements
         Route::get('announcements', [AnnouncementController::class, 'index'])
@@ -284,6 +325,9 @@ Route::prefix('user')
 
         Route::get('assignment/grade', [AssignmentController::class, 'grade'])
             ->name('assignment.grade');
+
+        Route::get('user/certificate/{certificate}/download', [CertificateController::class, 'download'])
+            ->name('certificate.download');
 
         Route::resource('courses', CourseController::class);
         Route::resource('assignment', AssignmentController::class);

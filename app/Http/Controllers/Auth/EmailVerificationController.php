@@ -37,6 +37,15 @@ class EmailVerificationController extends Controller
                 ->send(new WelcomeMail($request->user()));
 
         }, 3); // retry 3 times in case of deadlock
+        
+        activity_log(
+            'verify_email',
+            'authentication',
+            [
+                'status' => 'success',
+                'description' => 'You verified email address'
+            ]
+        );
 
         // Redirect the user based on role
         return $this->redirectByRole($request->user());

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Enrollment;
 use App\Models\Assignment;
 use App\Models\ModuleProgress;
+use App\Models\CourseModule;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -36,13 +38,6 @@ class UserDashboardController extends Controller
                     ->where('status', 'completed')
                     ->count();
 
-                $progress = $totalModules > 0
-                    ? round(($completedModules / $totalModules) * 100)
-                    : 0;
-
-                // Attach progress dynamically
-                $enrollment->progress = $progress;
-
                 return $enrollment;
             });
 
@@ -59,12 +54,11 @@ class UserDashboardController extends Controller
 
         // Ongoing enrollments
         $ongoingEnrollments = $enrollments->where('status', '!=', 'completed');
-
+        
         // Upcoming assignments
-        $upcomingAssignments = Assignment::whereIn(
-                'course_id',
-                $enrollments->pluck('course_id')
-            )
+        $upcomingAssignments = Assignment::whereHas('module', function ($q) use ($enrollments) {
+                $q->whereIn('course_id', $enrollments->pluck('course_id'));
+            })
             ->whereDate('deadline', '>=', now())
             ->orderBy('deadline')
             ->take(5)
@@ -84,7 +78,14 @@ class UserDashboardController extends Controller
     }
 
     public function activities() {
-        return view('user.activities');
+        $user = Auth::user();
+
+        // Fetch user's activity logs, latest first
+        $activities = ActivityLog::where('user_id', $user->id)
+                        ->latest()
+                       ->paginate(10); // pagination for scalability
+
+        return view('user.activities', compact('activities'));
     }
 
     public function update(Request $request)
@@ -101,13 +102,32 @@ class UserDashboardController extends Controller
             'phone'       => 'nullable|string|max:20',
             'address'     => 'nullable|string|max:255',
             'institution' => 'nullable|string|max:255',
+            'avatar'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ]);
+
+        $avatarPath = $user->avatar;
+
+        if ($request->hasFile('avatar')) {
+
+            if ($user->avatar && file_exists(public_path('uploads/profiles/'.$user->avatar))) {
+                unlink(public_path('uploads/profiles/'.$user->avatar));
+            }
+
+            $file = $request->file('avatar');
+
+            $filename = 'user_'.$user->id.'_'.time().'.'.$file->getClientOriginalExtension();
+
+            $file->move(public_path('uploads/profiles'), $filename);
+
+            $avatarPath = 'profiles/'.$filename;
+        }       
 
         // Update user table
         $user->update([
             'name'  => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'avatar' => $avatarPath,
         ]);
 
         // Update or create student profile
@@ -116,6 +136,15 @@ class UserDashboardController extends Controller
             [
                 'address'     => $request->address,
                 'institution' => $request->institution,
+            ]
+        );
+
+        activity_log(
+            'update_profile',
+            'profile',
+            [
+                'status' => 'success',
+                'description' => 'You updated profile information'
             ]
         );
 
@@ -138,6 +167,15 @@ class UserDashboardController extends Controller
         $user->update([
             'password' => Hash::make($request->new_password),
         ]);
+
+        activity_log(
+            'password_reset',
+            'authentication',
+            [
+                'status' => 'success',
+                'description' => 'You reset account password'
+            ]
+        );
 
         return back()->with('success', 'Password changed successfully.');
     }

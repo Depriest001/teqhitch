@@ -9,10 +9,28 @@
                 <div class="col-md-7 py-5 newsletter-text wow fadeIn" data-wow-delay="0.5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeIn;">
                     <div class="btn btn-sm border rounded-pill text-white px-3 mb-3">Newsletter</div>
                     <h1 class="text-white mb-4">Let's subscribe the newsletter</h1>
-                    <div class="position-relative w-100 mt-3 mb-2">
-                        <input class="form-control border-0 rounded-pill w-100 ps-4 pe-5" type="text" placeholder="Enter Your Email" style="height: 48px;">
-                        <button type="button" class="btn shadow-none position-absolute top-0 end-0 mt-1 me-2"><i class="fa fa-paper-plane text-global fs-4"></i></button>
-                    </div>
+                    <!-- Success Message -->
+                    @if(session('success'))
+                        <div class="alert alert-success p-2">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    <!-- Error Messages -->
+                    @if($errors->any())
+                        <div class="alert alert-danger p-2">
+                            <ul class="mb-0">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    <form action="{{ route('subscriber.store') }}" method="post" class="position-relative w-100 mt-3 mb-2">
+                        @csrf
+                        <input name="email" class="form-control border-0 rounded-pill w-100 ps-4 pe-5" type="email" placeholder="Enter Your Email" style="height: 48px;" autocomplete required>
+                        <button type="submit" class="btn shadow-none position-absolute top-0 end-0 mt-1 me-2"><i class="fa fa-paper-plane text-global fs-4"></i></button>
+                    </form>
                     <small class="text-white"> Get updates on our training programs, projects, and tech insights.</small>
                 </div>
             </div>

@@ -101,6 +101,17 @@
                         <span>₦{{ number_format($course->price, 2) }}</span>
                     </div>
 
+                    @php
+                        $coursePrice = (float) $course->price;
+
+                        $flutterwaveFee = ($coursePrice * 0.014) + 50;
+                        $totalAmount = round($coursePrice + $flutterwaveFee, 2);
+                    @endphp
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Fee</span>
+                        <span>₦{{ number_format($flutterwaveFee, 2) }}</span>
+                    </div>
+
                     <div class="d-flex justify-content-between mb-2">
                         <span>Payment Method</span>
                         <span>Flutterwave</span>
@@ -111,11 +122,11 @@
                     <div class="d-flex justify-content-between mb-3">
                         <strong>Total</strong>
                         <strong class="text-success">
-                            ₦{{ number_format($course->price, 2) }}
+                            ₦{{ $totalAmount }}
                         </strong>
                     </div>
 
-                    <button class="btn btn-success w-100 py-2" id="buy-now">
+                    <button class="btn btn-success w-100 py-2" id="buy_now">
                         <i class="bx bx-credit-card me-2"></i> Pay Now
                     </button>
 
@@ -151,20 +162,92 @@
 </div>
 {{-- Flutterwave --}}
 <script src="https://checkout.flutterwave.com/v3.js"></script>
-@php
-    $coursePrice = (float) $course->price;
 
-    $flutterwaveFee = ($coursePrice * 0.014) + 50;
-    $totalAmount = round($coursePrice + $flutterwaveFee, 2);
-@endphp
-
-<script>
+<!-- <script>
     let paymentCompleted = false;
-    document.getElementById('buy-now').addEventListener('click', function () {
+    document.getElementById('buy_now').addEventListener('click', function () {
+
+        fetch("{{ route('user.course.initialize', $course->id) }}", {
+            method: "POST",
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            
+            FlutterwaveCheckout({
+                public_key: "{{ config('services.flutterwave.public_key') }}",
+                tx_ref: data.tx_ref,
+                amount: data.amount,
+                currency: "NGN",
+                payment_options: "card,banktransfer,ussd",
+
+                customer: {
+                    email: "{{ auth()->user()->email }}",
+                    name: "{{ auth()->user()->name }}"
+                },
+
+                meta: {
+                    course_id: "{{ $course->id }}",
+                    student_id: "{{ auth()->id() }}"
+                },
+
+                customizations: {
+                    title: "{{ $course->title }}",
+                    description: "Course Enrollment Payment",
+                    logo: "{{ asset('uploads/'.$globalSetting->site_logo) }}"
+                },
+
+                redirect_url: "{{ route('user.course.callback', $course->id) }}",
+
+                onclose: function () {
+                    // console.log("Payment closed");
+                    if (!paymentCompleted) {
+                        const toastElement = document.getElementById('appToast');
+                        const toastTitle = document.getElementById('toastTitle');
+                        const toastBody = document.getElementById('toastBody');
+
+                        toastElement.classList.remove('d-none');
+                        toastElement.classList.add('d-block');
+
+                        toastTitle.innerText = "Payment Canceled";
+                        toastBody.innerText = "You closed the payment without completing it.";
+
+                        const toast = new bootstrap.Toast(toastElement);
+                        toast.show();
+                    };
+                }
+            });
+        });
+
+    });
+</script> -->
+<script>
+let paymentCompleted = false;
+
+document.getElementById('buy_now').addEventListener('click', function () {
+
+    fetch("{{ route('user.course.initialize', $course->id) }}", {
+        method: "POST",
+        headers: {
+            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Server error: " + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+
         FlutterwaveCheckout({
             public_key: "{{ config('services.flutterwave.public_key') }}",
-            tx_ref: "{{ $tx_ref }}",
-            amount: {{ $totalAmount }},
+            tx_ref: data.tx_ref,
+            amount: data.amount,
             currency: "NGN",
             payment_options: "card,banktransfer,ussd",
 
@@ -187,24 +270,19 @@
             redirect_url: "{{ route('user.course.callback', $course->id) }}",
 
             onclose: function () {
-                // console.log("Payment closed");
                 if (!paymentCompleted) {
-                    const toastElement = document.getElementById('appToast');
-                    const toastTitle = document.getElementById('toastTitle');
-                    const toastBody = document.getElementById('toastBody');
-
-                    toastElement.classList.remove('d-none');
-                    toastElement.classList.add('d-block');
-
-                    toastTitle.innerText = "Payment Canceled";
-                    toastBody.innerText = "You closed the payment without completing it.";
-
-                    const toast = new bootstrap.Toast(toastElement);
+                    const toast = new bootstrap.Toast(document.getElementById('appToast'));
+                    document.getElementById('toastTitle').innerText = "Payment Canceled";
+                    document.getElementById('toastBody').innerText = "You closed the payment.";
                     toast.show();
-                };
+                }
             }
         });
+    })
+    .catch(error => {
+        console.error("ERROR:", error); // ❗ VERY IMPORTANT
     });
-</script>
 
+});
+</script>
 @endsection

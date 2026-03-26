@@ -56,6 +56,16 @@ class AuthController extends Controller
                 return redirect()->route('verification.notice');
             }
 
+            activity_log(
+                'login',
+                'authentication',
+                [
+                    'role' => $user->role,
+                    'status' => 'success',
+                    'description' => 'User Logged in successfully'
+                ]
+            );
+
             return $user->role === 'instructor'
             ? redirect()->route('staff.dashboard')
             : redirect()->route('user.dashboard');
@@ -106,7 +116,6 @@ class AuthController extends Controller
                 'phone' => $request->phone,
                 'role' => 'student',                     // default role
                 'status' => 'active',                    // default status
-                'avatar' => 'user.png',                // static avatar stored in public/images/avatar.png
             ]);
             // Create Instructor Profile
             StudentProfile::create([
@@ -117,7 +126,15 @@ class AuthController extends Controller
 
             // Optional: login the user after registration
             Auth::login($user);
-
+            activity_log(
+                'register',
+                'authentication',
+                [
+                    'email' => $user->email,
+                    'status' => 'success',
+                    'description' => 'User registered successfully'
+                ]
+            );
             return redirect()->route('verification.notice');
         });
 

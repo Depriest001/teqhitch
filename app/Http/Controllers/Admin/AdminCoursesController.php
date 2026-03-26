@@ -42,18 +42,18 @@ class AdminCoursesController extends Controller
     {
         $course = Course::with([
                 'instructor',
-                'modules',
-                'assignments',
+                'modules' => function ($query) {
+                    $query->withCount('assignments'); // counts assignments per module
+                },
                 'features',
                 'outcomes',
-                'enrollments.student'
+                'recentEnrollments.student'
             ])
             ->withCount([
                 'enrollments as students_count' => function ($q) {
                     $q->where('status', 'active');
                 },
-                'modules',
-                'assignments'
+                'modules'
             ])
             ->findOrFail($id);
 

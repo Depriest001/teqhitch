@@ -10,7 +10,7 @@ class Assignment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'course_id',
+        'module_id',
         'instructor_id',
         'title',
         'instructions',
@@ -19,9 +19,9 @@ class Assignment extends Model
     ];
 
     // Relationship: Assignment belongs to a course
-    public function course()
+    public function Module()
     {
-        return $this->belongsTo(Course::class, 'course_id');
+        return $this->belongsTo(CourseModule::class, 'module_id');
     }
 
     // Relationship: Assignment belongs to an instructor
@@ -33,7 +33,7 @@ class Assignment extends Model
     // Relationship: Assignment has many submissions
     public function submissions()
     {
-        return $this->hasMany(AssignmentSubmission::class, 'assignment_id');
+        return $this->hasMany(AssignmentSubmission::class);
     }
     
 }

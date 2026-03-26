@@ -25,6 +25,6 @@ class ActivityLog extends Model
     // Relationship: ActivityLog belongs to a user (nullable)
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 }

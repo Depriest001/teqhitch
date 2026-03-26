@@ -8,6 +8,7 @@ use App\Models\Enrollment;
 use App\Models\Course;
 use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -55,12 +56,19 @@ class StaffDashboardController extends Controller
             ->take(5)
             ->get();
 
+        // ======== RECENT ACTIVITIES ========
+        $activities = ActivityLog::where('user_id', $instructorId)
+            ->latest()
+            ->take(6)
+            ->get();
+
         return view('staff.index', compact(
             'courses',
             'activeCoursesCount',
             'totalStudents',
             'pendingGrading',
-            'pendingAssignmentsList'
+            'pendingAssignmentsList',
+            'activities'
         ));
     }
 
@@ -81,6 +89,17 @@ class StaffDashboardController extends Controller
         }
 
         return view('staff.profile', compact('user'));
+    }
+
+    public function activities() {
+        $user = Auth::user();
+
+        // Fetch user's activity logs, latest first
+        $activities = ActivityLog::where('user_id', $user->id)
+                        ->latest()
+                       ->paginate(20); // pagination for scalability
+
+        return view('staff.activities', compact('activities'));
     }
 
     public function updateProfile(Request $request)
@@ -114,6 +133,14 @@ class StaffDashboardController extends Controller
             ]
         );
 
+        activity_log(
+            'update_profile',
+            'profile',
+            [
+                'status' => 'success',
+                'description' => 'You updated profile information'
+            ]
+        );
         return back()->with('success', 'Profile updated successfully!');
     }
 

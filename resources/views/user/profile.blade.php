@@ -46,7 +46,8 @@
             <div class="card-body pt-4">
                 <form class="row"
                     action="{{ route('user.profile.update') }}"
-                    method="POST">
+                    method="POST"
+                    enctype="multipart/form-data">
 
                     @csrf
                     @method('PATCH')
@@ -85,9 +86,22 @@
                             class="form-control"
                             value="{{ optional(auth()->user()->studentProfile)->institution }}">
                     </div>
+                    <div class="col-md-6">
+                        @php
+                            $profile = auth()->user()->avatar ?? null;
+                        @endphp
+                        
+                        <div class="mb-3 text-center">
+                            <label for="profileInput" class="" style="cursor: pointer;">
+                                <img id="profilePic" src="{{ $profile ? asset('uploads/'.$profile) : asset('dashboardassets/images/avatar/user.png') }}" class="rounded-circle d-block border border-3 border-secondary" width="100" height="100" alt="Profile Picture">
+                            </label>
+                            <input type="file" id="profileInput" name="avatar" accept="image/*" hidden>
+                            <p class="mt-2 text-muted">Tap to change profile picture</p>
+                        </div>
+                    </div>
 
                     <div class="col-md-12 d-flex justify-content-end gap-2">
-                        <a href="{{ url()->previous() }}" class="btn btn-light">Cancel</a>
+                        <a href="{{ url()->previous() }}" class="btn btn-light" id="dismiss">Cancel</a>
                         <button class="btn btn-primary">
                             <i class="bx bx-save"></i> Update Profile
                         </button>
@@ -154,4 +168,56 @@
             </div>
         </div>        
     </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const input = document.getElementById("profileInput");
+        const preview = document.getElementById("profilePic");
+        const dismissBtn = document.getElementById("dismiss");
+
+        let objectUrl = null;
+
+        if (!input || !preview) return;
+
+        input.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith("image/")) {
+                alert("Please select a valid image.");
+                input.value = "";
+                return;
+            }
+
+            // Validate file size (2MB example)
+            const maxSize = 2 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert("Image must be less than 2MB.");
+                input.value = "";
+                return;
+            }
+
+            // Clean previous preview
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+            }
+
+            objectUrl = URL.createObjectURL(file);
+
+            preview.src = objectUrl;
+        });
+
+        dismissBtn?.addEventListener("click", () => {
+            preview.src = "{{ $profile ? asset('uploads/'.$profile) : asset('dashboardassets/images/avatar/user.png') }}";
+            input.value = "";
+
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+                objectUrl = null;
+            }
+        });
+
+    });
+</script>
 @endsection

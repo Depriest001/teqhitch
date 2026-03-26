@@ -5,7 +5,7 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     @if (session('success') || session('error') || $errors->any())
         <div id="appToast"
-            class="bs-toast toast fade show position-fixed bottom-0 end-0 m-3
+            class="bs-toast toast fade show position-fixed top-0 end-0 m-3
             {{ session('success') ? 'bg-success' : (session('error') ? 'bg-danger' : 'bg-warning') }}"
             role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
             <div class="toast-header text-white">
@@ -85,6 +85,7 @@
                         <th>#</th>
                         <th>Student</th>
                         <th>Email</th>
+                        <th>Profile</th>
                         <th>Status</th>
                         <th>Enrolled Courses</th>
                         <th>Joined At</th>
@@ -96,6 +97,10 @@
                 @foreach($students as $student)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
+                        <td>
+                            <img src="{{ $student->avatar ? asset('uploads/'.$student->avatar) : '' }}" 
+                                width="40" height="40" class="rounded">
+                        </td>
                         <td>{{ $student->name }}</td>
                         <td>{{ $student->email }}</td>
                         <td>
@@ -103,7 +108,7 @@
                                 {{ $student->status }}
                             </span>
                         </td>
-                        <td>{{ $student->courses_count ?? 0 }}</td>
+                        <td>{{ $student->enrollments_count ?? 0 }}</td>
                         <td>{{ $student->created_at->format('M d, Y') }}</td>
                         <td class="text-nowrap">
                             <a href="{{ route('admin.student.show', $student) }}" class="btn btn-sm btn-info"><i class="bx bx-show"></i></a>
