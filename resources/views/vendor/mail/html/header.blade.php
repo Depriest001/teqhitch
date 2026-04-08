@@ -4,13 +4,12 @@
     <td class="">
         <div class="header" style="text-align: center; margin: auto;">
             <a href="{{ $url }}" style="text-decoration: none;">
-                <img src="{{ config('app.url') }}/assets/img/favicon.jpg"
+                <img  src="{{ url('uploads/' . $globalSetting->site_logo) }}" 
                     alt="{{ config('app.name') }}"
-                    style="max-height: 60px; display: inline-block; margin: 0 auto;">
-
-                <h2 style="margin: 5px 0; color: #fff; display: inline-block;">
+                    style="max-height: 60px; width: 40px; display: block; margin: 0 auto;">
+                <h1 style="padding-top: 5px; color: #fff; display: inline-block;">
                     Teqhitch
-                </h2>
+                </h1>
 
             </a>
         </div>

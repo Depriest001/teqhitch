@@ -49,6 +49,10 @@ class SubscriberController extends Controller
     {
         $subscriber = Subscriber::where('token', $token)->firstOrFail();
 
+        if ($subscriber->is_active) {
+            return redirect('/thank-you')->with('message', 'Already verified.');
+        }
+
         $subscriber->activate();
 
         return redirect('/thank-you')->with('message', 'Your subscription has been confirmed!');
@@ -60,6 +64,10 @@ class SubscriberController extends Controller
     public function unsubscribe($email)
     {
         $subscriber = Subscriber::where('email', $email)->firstOrFail();
+
+        if (!$subscriber->is_active) {
+            return redirect('/unsubscribe')->with('message', 'Already unsubscribed.');
+        }
         $subscriber->deactivate();
 
         return redirect('/unsubscribe')->with('message', 'You have successfully unsubscribed.');

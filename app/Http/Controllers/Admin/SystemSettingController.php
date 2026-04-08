@@ -49,22 +49,52 @@ class SystemSettingController extends Controller
 
         $settings = SystemInfo::first();
 
+        // --- Handle Site Logo ---
         if ($request->hasFile('site_logo')) {
-            if ($settings->site_logo && Storage::disk('public')->exists($settings->site_logo)) {
-                Storage::disk('public')->delete($settings->site_logo);
+            // 1. Delete old logo if it exists
+            if ($settings->site_logo) {
+                $oldLogoPath = base_path('../uploads/' . $settings->site_logo);
+                if (file_exists($oldLogoPath) && is_file($oldLogoPath)) {
+                    unlink($oldLogoPath);
+                }
             }
 
-            $settings->site_logo = $request->file('site_logo')
-                ->store('branding', 'public');
+            // 2. Prepare the file
+            $logoFile = $request->file('site_logo');
+            $logoName = 'logo_' . time() . '.' . $logoFile->getClientOriginalExtension();
+            
+            // 3. Physical Destination: public_html/uploads/branding
+            $physicalPath = base_path('../uploads/branding');
+
+            // 4. Move the file
+            $logoFile->move($physicalPath, $logoName);
+
+            // 5. Save the string "branding/logo_123.png" to the database
+            $settings->site_logo = 'branding/' . $logoName;
         }
 
+        // --- Handle Favicon ---
         if ($request->hasFile('favicon')) {
-            if ($settings->favicon && Storage::disk('public')->exists($settings->favicon)) {
-                Storage::disk('public')->delete($settings->favicon);
+            // 1. Delete old favicon if it exists
+            if ($settings->favicon) {
+                $oldFaviconPath = base_path('../uploads/' . $settings->favicon);
+                if (file_exists($oldFaviconPath) && is_file($oldFaviconPath)) {
+                    unlink($oldFaviconPath);
+                }
             }
 
-            $settings->favicon = $request->file('favicon')
-                ->store('branding', 'public');
+            // 2. Prepare the file
+            $faviconFile = $request->file('favicon');
+            $faviconName = 'favicon_' . time() . '.' . $faviconFile->getClientOriginalExtension();
+            
+            // 3. Physical Destination: public_html/uploads/branding
+            $physicalPath = base_path('../uploads/branding');
+
+            // 4. Move the file
+            $faviconFile->move($physicalPath, $faviconName);
+
+            // 5. Save the string "branding/favicon_123.png" to the database
+            $settings->favicon = 'branding/' . $faviconName;
         }
 
         $settings->save();
@@ -125,7 +155,4 @@ class SystemSettingController extends Controller
 
         return back()->with('success', 'About information updated successfully!');
     }
-
-
-
 }

@@ -108,7 +108,7 @@
                             @case('docx')
                             @case('ppt')
                                 <iframe
-                                    src="https://docs.google.com/gview?url={{ asset('uploads/' . $currentModule->file_path) }}&embedded=true"
+                                    src="https://docs.google.com/gview?url={{ urlencode(url('uploads/' . $currentModule->file_path)) }}&embedded=true"
                                     width="100%"
                                     height="600"
                                     style="border:none;">
