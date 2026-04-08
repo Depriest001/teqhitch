@@ -24,6 +24,8 @@ use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\PapersController;
 use App\Http\Controllers\Admin\TopicPaymentController;
 use App\Http\Controllers\Admin\NewslettersController;
+use App\Http\Controllers\Admin\TestimonyController;
+use App\Http\Controllers\Admin\TeamController;
 
 // staff
 use App\Http\Controllers\Staff\StaffDashboardController;
@@ -203,6 +205,12 @@ Route::prefix('admin')
 
         Route::get('newsletter/{newsletter}/send', [NewslettersController::class, 'send'])
             ->name('newsletter.send');
+
+        Route::get('testimonies/show', [TestimonyController::class, 'show1'])
+            ->name('testimonies.show1');
+
+        Route::get('teams/show', [TeamController::class, 'show1'])
+            ->name('teams.show1');
             
         // Resources
         Route::resources([
@@ -215,6 +223,8 @@ Route::prefix('admin')
             'announcement' => AdminAnnouncementController::class,
             'topics' => TopicController::class,
             'newsletter' => NewslettersController::class,
+            'testimonies' => TestimonyController::class,
+            'teams' => TeamController::class,
         ]);
     });
 

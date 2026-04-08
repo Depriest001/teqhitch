@@ -60,6 +60,13 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->routeIs('admin.teams.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.teams.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bxs-user-circle"></i>
+                <div class="text-truncate"> Teams</div>
+            </a>
+        </li>
+
         <li class="menu-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}">
             <a href="{{ route('admin.certificates.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-award"></i>
@@ -92,6 +99,13 @@
             <a href="{{ route('admin.announcement.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-bell"></i>
                 <div class="text-truncate"> Announcement</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.testimonies.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.testimonies.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-comment"></i>
+                <div class="text-truncate"> Testimonies</div>
             </a>
         </li>
 
