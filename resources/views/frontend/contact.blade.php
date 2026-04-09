@@ -98,14 +98,14 @@
     <!-- Google Maps -->
     <div class="container-fluid pb-5">
         <div class="container wow fadeIn" data-wow-delay="0.2s">
-          <iframe
-            style="border:0; width:100%; height:270px;"
-            src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12721.2345!2d8.027427!3d6.385025!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1040f8d27d1a4537%3A0x0!2sIzzi%20High%20School%2C%20Ishieke!5e0!3m2!1sen!2sng!4v1697800000000!5m2!1sen!2sng"
-            frameborder="0"
-            allowfullscreen=""
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
-          </iframe>
+            <iframe
+                style="border:0; width:100%; height:270px;"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.1114940237567!2d8.0394747!3d6.3796069!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x105b5952d7c0b553%3A0x4d3e9f04d7165fcc!2sTeqhitch%20ICT%20Academy%20Limited!5e0!3m2!1sen!2sng!4v1775660607039!5m2!1sen!2sng"
+                frameborder="0"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
         </div>
     </div>
     <!-- End Google Maps -->

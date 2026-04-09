@@ -158,8 +158,19 @@
                   </div>
                 </div>
 
-                <div class="mb-6">
+                <div class="mb-3">
                   <button class="btn btn-primary d-grid w-100" type="submit">Register</button>
+                </div>
+                <div class="text-center my-3 text-muted">or</div>
+                <div class="mb-4 d-grid">
+                    <a href="{{ route('google.login') }}" 
+                      class="btn btn-light border d-flex align-items-center justify-content-center gap-2 shadow-sm py-2">
+                        
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" 
+                            alt="Google" width="20" height="20">
+
+                        <span class="fw-medium">Continue with Google</span>
+                    </a>
                 </div>
                 <p> I already have an account? 
                   <a href="{{ route('login') }}">

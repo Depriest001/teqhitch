@@ -7,6 +7,7 @@ use App\Http\Controllers\View\SubscriberController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\AuthController\AuthController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Middleware\CheckInstructor;
 
 // admin
@@ -127,6 +128,11 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout')->name('logout');
 });
 
+// Signin with google
+Route::controller(GoogleController::class)->group(function () {
+    Route::get('/auth/google', 'redirect')->name('google.login');
+    Route::get('/auth/google/callback', 'callback')->name('google.callback');
+});
 
 // =====================
 // ADMIN ROUTES

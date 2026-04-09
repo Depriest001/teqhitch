@@ -89,11 +89,16 @@
                     <div class="col-md-6">
                         @php
                             $profile = auth()->user()->avatar ?? null;
+                            $profileUrl = $profile
+                                ? (filter_var($profile, FILTER_VALIDATE_URL)
+                                    ? $profile
+                                    : asset('uploads/'.$profile))
+                                : null;
                         @endphp
                         
                         <div class="mb-3 text-center">
                             <label for="profileInput" class="" style="cursor: pointer;">
-                                <img id="profilePic" src="{{ $profile ? asset('uploads/'.$profile) : asset('dashboardassets/images/avatar/user.png') }}" class="rounded-circle d-block border border-3 border-secondary" width="100" height="100" alt="Profile Picture">
+                                <img id="profilePic" src="{{ $profileUrl }}" class="rounded-circle d-block border border-3 border-secondary" width="100" height="100" alt="Profile Picture">
                             </label>
                             <input type="file" id="profileInput" name="avatar" accept="image/*" hidden>
                             <p class="mt-2 text-muted">Tap to change profile picture</p>
@@ -209,7 +214,7 @@
         });
 
         dismissBtn?.addEventListener("click", () => {
-            preview.src = "{{ $profile ? asset('uploads/'.$profile) : asset('dashboardassets/images/avatar/user.png') }}";
+            preview.src = "{{ $profileUrl }}";
             input.value = "";
 
             if (objectUrl) {

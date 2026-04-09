@@ -14,6 +14,11 @@
     @php
       $favicon = $globalSetting->favicon ?? null;
       $profile = auth()->user()->avatar ?? null;
+      $profileUrl = $profile
+        ? (filter_var($profile, FILTER_VALIDATE_URL)
+            ? $profile
+            : asset('uploads/'.$profile))
+        : null;
     @endphp
 
     <link rel="icon"
@@ -85,16 +90,16 @@
                       href="javascript:void(0);"
                       data-bs-toggle="dropdown">
                       <div class="avatar avatar-online">
-                        <img src="{{ $profile ? asset('uploads/'.$profile) : asset('dashboardassets/images/avatar/user.png') }}" alt class="w-px-40 rounded-circle border" />
+                        <img src="{{ $profileUrl }}" alt="Profile" class="w-px-40 rounded-circle border" />
                       </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                      <li>
+                      <li style="cursor: pointer;">
                         <a class="dropdown-item">
                           <div class="d-flex">
                             <div class="flex-shrink-0 me-3">
                               <div class="avatar avatar-online">
-                                <img src="{{ $profile ? asset('uploads/'.$profile) : asset('dashboardassets/images/avatar/user.png') }}" alt class="w-px-40 rounded-circle border" />
+                                <img src="{{ $profileUrl }}" alt="Profile" class="w-px-40 rounded-circle border" />
                               </div>
                             </div>
                             <div class="flex-grow-1">
