@@ -60,6 +60,20 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->routeIs('admin.enrollments.*') || request()->routeIs('enrollments.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.enrollments.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-spreadsheet"></i>
+                <div class="text-truncate">Enrollment Applicants</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.team.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.team.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bxs-user-circle"></i>
+                <div class="text-truncate"> Team</div>
+            </a>
+        </li>
+
         <li class="menu-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}">
             <a href="{{ route('admin.certificates.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-award"></i>
@@ -88,10 +102,24 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->routeIs('admin.news.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.news.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-news"></i>
+                <div class="text-truncate"> News</div>
+            </a>
+        </li>
+
         <li class="menu-item {{ request()->routeIs('admin.announcement.*') ? 'active' : '' }}">
             <a href="{{ route('admin.announcement.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-bell"></i>
                 <div class="text-truncate"> Announcement</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.testimony.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.testimony.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-comment"></i>
+                <div class="text-truncate"> Testimonies</div>
             </a>
         </li>
 

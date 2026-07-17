@@ -16,11 +16,12 @@ class Course extends Model
         'slug',
         'subtitle',
         'description',
-        'overview',
         'price',
         'duration',
         'thumbnail',
         'icon',
+        'category',
+        'level',
         'status',
     ];
 
@@ -116,15 +117,14 @@ class Course extends Model
         );
     }
 
-    // Course Features
-    public function features()
-    {
-        return $this->hasMany(CourseFeature::class)->active()->orderBy('position');
-    }
-
     // Course Outcomes
     public function outcomes()
     {
         return $this->hasMany(CourseOutcome::class)->orderBy('position');
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(EnrollmentApplication::class, 'course_id');
     }
 }

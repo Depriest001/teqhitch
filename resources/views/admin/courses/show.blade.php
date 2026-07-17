@@ -79,6 +79,11 @@
                         Instructor: {{ $course->instructor->name ?? 'Not Assigned' }}
                     </p>
 
+                    <div class="mb-2">
+                        <span class="badge bg-light text-dark border me-1">{{ $course->category ?? 'No Category' }}</span>
+                        <span class="badge bg-light text-primary border">{{ $course->level ?? 'No Level' }}</span>
+                    </div>
+
                     <span class="badge 
                         @if($course->status === 'published') bg-success
                         @elseif($course->status === 'draft') bg-warning
@@ -110,6 +115,8 @@
                     <hr>
 
                     <p class="text-start">
+                        <strong>Category:</strong> {{ $course->category ?? '—' }} <br>
+                        <strong>Level:</strong> {{ $course->level ?? '—' }} <br>
                         <strong>Duration:</strong> {{ $course->duration ?? '—' }} <br>
                         <strong>Price:</strong> ₦{{ number_format($course->price,2) ?? '0.00' }} <br>
                         <strong>Created:</strong> {{ $course->created_at->format('M d, Y') }}
@@ -135,34 +142,13 @@
                     <h5 class="fw-bold mb-2">Course Description</h5>
                     <div>{!! $course->description !!}</div>
                 </div>
-                <div class="card-body">
-                    <h5 class="fw-bold mb-2">Course Overview</h5>
-                    <div>{!! $course->overview !!}</div>
-                </div>
             </div>
             
-            {{-- Features --}}
-            @if($course->features->count())
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-3">Course Features</h5>
-                    <ul class="list-group list-group-flush">
-                        @foreach($course->features as $feature)
-                            <li class="list-group-item">
-                                <strong>{{ $feature->title }}</strong><br>
-                                <small class="text-muted">{{ $feature->description }}</small>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-            @endif
-
             {{-- Outcomes --}}
             @if($course->outcomes->count())
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3">Learning Outcomes</h5>
+                    <h5 class="fw-bold mb-3">Learning Curriculum</h5>
                     <ul>
                         @foreach($course->outcomes as $outcome)
                             <li>{{ $outcome->content }}</li>

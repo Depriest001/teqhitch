@@ -49,7 +49,6 @@
         </a>
     </div>
 
-    <!-- Statistics -->
     <div class="row g-4 mb-4">
         <div class="col-md-4">
             <div class="card shadow-sm p-3">
@@ -73,19 +72,20 @@
         </div>
     </div>
 
-    <!-- Courses Table -->
     <div class="card shadow-sm">
         <div class="card-header border-bottom">
             <h5 class="mb-0">Course List</h5>
         </div>
 
         <div class="table-responsive">
-            <table class="table tabl-sm table-hover align-middle" id="exampleTable">
+            <table class="table table-sm table-hover align-middle" id="exampleTable">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>image</th>
                         <th>Course Title</th>
+                        <th>Category</th>
+                        <th>Level</th>
                         <th>Instructor</th>
                         <th>Status</th>
                         <th>Students</th>
@@ -105,6 +105,10 @@
                         </td>
 
                         <td>{{ $course->title }}</td>
+
+                        <td><span class="badge bg-light text-dark border">{{ $course->category ?? '—' }}</span></td>
+                        
+                        <td><span class="badge bg-light text-primary border">{{ $course->level ?? '—' }}</span></td>
 
                         <td>{{ $course->instructor->name ?? 'Unknown' }}</td>
 

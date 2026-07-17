@@ -1,6 +1,5 @@
-
-    <!-- Newsletter Start -->
-    <div class="container-fluid bg-primary newsletter py-5">
+<!-- Newsletter Start -->
+    <div class="container-fluid newsletter py-3" id="newsletter">
         <div class="container">
             <div class="row g-5 align-items-center">
                 <div class="col-md-5 ps-lg-0 pt-5 pt-md-0 text-start d-md-block d-none wow fadeIn" data-wow-delay="0.3s" style="visibility: visible; animation-delay: 0.3s; animation-name: fadeIn;">
@@ -8,7 +7,7 @@
                 </div>
                 <div class="col-md-7 py-5 newsletter-text wow fadeIn" data-wow-delay="0.5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeIn;">
                     <div class="btn btn-sm border rounded-pill text-white px-3 mb-3">Newsletter</div>
-                    <h1 class="text-white mb-4">Let's subscribe the newsletter</h1>
+                    <h3 class="text-white mb-4">Let's subscribe the newsletter</h3>
                     <!-- Success Message -->
                     @if(session('success'))
                         <div class="alert alert-success p-2">
@@ -39,22 +38,22 @@
     <!-- Newsletter End -->
 
     <!-- Footer Start -->
-    <div class="container-fluid bg-dark text-white-50 footer pt-5" style="background: linear-gradient(to right, #14183E, #1b7c74, #14183E);">
-        <div class="container py-5">
+    <div class="container-fluid text-white-50 footer pt-5">
+        <div class="container py-3">
             <div class="row g-5">
                 <div class="col-md-6 col-lg-3 wow fadeIn" data-wow-delay="0.1s">
                     <a href="{{route('home')}}" class="d-inline-block mb-3">
-                        <h1 class="text-white">Teq<span class="text-global">h</span>itch</h1>
+                        <h3 class="text-white">Teq<span class="text-global">h</span>itch</h3>
                     </a>
-                    <p class="mb-0">{{ $globalSetting->site_name }} is committed to delivering top-tier digital training, helping individuals and businesses thrive through hands-on learning, expert guidance, and real-world tech solutions.</p>
+                    <p class="mb-0 small">{{ $globalSetting->site_name }} is committed to delivering top-tier digital training, helping individuals and businesses thrive through hands-on learning, expert guidance, and real-world tech solutions.</p>
                 </div>
                 <div class="col-md-6 col-lg-3 wow fadeIn" data-wow-delay="0.3s">
                     <h5 class="text-white mb-4">Get In Touch</h5>
-                    <p><i class="fa fa-map-marker-alt me-3"></i>
+                    <p class="small"><i class="fa fa-map-marker-alt me-3"></i>
                         {{ $globalSetting->address }}
                     </p>
-                    <p><i class="fa fa-phone-alt me-3"></i>{{ $globalSetting->support_phone }}</p>
-                    <p><i class="fa fa-envelope me-3"></i>{{ $globalSetting->support_email }}</p>
+                    <p class="small"><i class="fa fa-phone-alt me-3"></i>{{ $globalSetting->support_phone }}</p>
+                    <p class="small"><i class="fa fa-envelope me-3"></i>{{ $globalSetting->support_email }}</p>
                     <div class="d-flex pt-2">
                         <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
                         <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
@@ -65,17 +64,17 @@
                 </div>
                 <div class="col-md-6 col-lg-3 wow fadeIn" data-wow-delay="0.5s">
                     <h5 class="text-white mb-4">Popular Link</h5>
-                    <a class="btn btn-link" href="{{route('about')}}">About Us</a>
-                    <a class="btn btn-link" href="">Contact Us</a>
-                    <a class="btn btn-link" href="">Privacy Policy</a>
-                    <a class="btn btn-link" href="">Terms & Condition</a>
+                    <a class="btn btn-link small" href="{{route('about')}}">About Us</a>
+                    <a class="btn btn-link small" href="{{route('contact')}}">Contact Us</a>
+                    <a class="btn btn-link small" href="{{route('services')}}">Courses</a>
+                    <a class="btn btn-link small" href="{{route('news')}}">News</a>
                 </div>
                 <div class="col-md-6 col-lg-3 wow fadeIn" data-wow-delay="0.7s">
                     <h5 class="text-white mb-4">Our Services</h5>
-                    <a class="btn btn-link" href="">Robotic Automation</a>
-                    <a class="btn btn-link" href="">Machine learning</a>
-                    <a class="btn btn-link" href="">Data Science</a>
-                    <a class="btn btn-link" href="">Robot Technology</a>
+                    <a class="btn btn-link small" href="#">Robotic Automation</a>
+                    <a class="btn btn-link small" href="#">Machine learning</a>
+                    <a class="btn btn-link small" href="#">Data Science</a>
+                    <a class="btn btn-link small" href="#">Robot Technology</a>
                 </div>
             </div>
         </div>
@@ -83,14 +82,14 @@
             <div class="copyright">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        &copy; <a class="border-bottom">Teqhitch</a>, All Right Reserved.
+                        &copy; Teqhitch, All Right Reserved.
                     </div>
                     <div class="col-md-6 text-center text-md-end">
                         <div class="footer-menu">
                             <a href="{{route('home')}}">Home</a>
                             <a href="{{route('contact')}}">Contact</a>
                             <a href="{{route('about')}}">About</a>
-                            <a href="">FAQs</a>
+                            <a href="{{route('services')}}">Programs</a>
                         </div>
                     </div>
                 </div>

@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('subtitle')->nullable();
             $table->text('description')->nullable();
-            $table->text('overview')->nullable();
             $table->decimal('price',10,2)->default(0);
             $table->string('duration');
             $table->string('thumbnail')->nullable();

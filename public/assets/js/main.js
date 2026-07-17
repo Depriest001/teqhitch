@@ -15,20 +15,6 @@
     // Initiate the wowjs
     new WOW().init();
 
-
-    // Sticky Navbar
-    $(window).scroll(function () {
-        if ($(this).scrollTop() > 300) {
-            $('.sticky-top').addClass('bg-global-second shadow-sm').css('top', '0px');
-            $('.logoText').css('color', '#19E6D4');
-            
-        } else {
-            $('.sticky-top').removeClass('bg-global-second shadow-sm').css('top', '-150px');
-            $('.logoText').css('color', '#14183E');
-        }
-    });
-
-
     // Facts counter
     $('[data-toggle="counter-up"]').counterUp({
         delay: 10,

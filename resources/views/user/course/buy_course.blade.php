@@ -92,8 +92,8 @@
                     <h5 class="mb-3">Payment Summary</h5>
 
                     <div class="d-flex justify-content-between mb-2">
-                        <span>Course</span>
-                        <span>{{ $course->title }}</span>
+                        <span>Course: &nbsp;</span>
+                        <span class="text-end">{{ $course->title }}</span>
                     </div>
 
                     <div class="d-flex justify-content-between mb-2">
@@ -122,7 +122,7 @@
                     <div class="d-flex justify-content-between mb-3">
                         <strong>Total</strong>
                         <strong class="text-success">
-                            ₦{{ $totalAmount }}
+                            ₦{{ number_format($totalAmount) }}
                         </strong>
                     </div>
 
@@ -162,68 +162,6 @@
 </div>
 {{-- Flutterwave --}}
 <script src="https://checkout.flutterwave.com/v3.js"></script>
-
-<!-- <script>
-    let paymentCompleted = false;
-    document.getElementById('buy_now').addEventListener('click', function () {
-
-        fetch("{{ route('user.course.initialize', $course->id) }}", {
-            method: "POST",
-            headers: {
-                'X-CSRF-TOKEN': "{{ csrf_token() }}",
-                'Content-Type': 'application/json'
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            
-            FlutterwaveCheckout({
-                public_key: "{{ config('services.flutterwave.public_key') }}",
-                tx_ref: data.tx_ref,
-                amount: data.amount,
-                currency: "NGN",
-                payment_options: "card,banktransfer,ussd",
-
-                customer: {
-                    email: "{{ auth()->user()->email }}",
-                    name: "{{ auth()->user()->name }}"
-                },
-
-                meta: {
-                    course_id: "{{ $course->id }}",
-                    student_id: "{{ auth()->id() }}"
-                },
-
-                customizations: {
-                    title: "{{ $course->title }}",
-                    description: "Course Enrollment Payment",
-                    logo: "{{ asset('uploads/'.$globalSetting->site_logo) }}"
-                },
-
-                redirect_url: "{{ route('user.course.callback', $course->id) }}",
-
-                onclose: function () {
-                    // console.log("Payment closed");
-                    if (!paymentCompleted) {
-                        const toastElement = document.getElementById('appToast');
-                        const toastTitle = document.getElementById('toastTitle');
-                        const toastBody = document.getElementById('toastBody');
-
-                        toastElement.classList.remove('d-none');
-                        toastElement.classList.add('d-block');
-
-                        toastTitle.innerText = "Payment Canceled";
-                        toastBody.innerText = "You closed the payment without completing it.";
-
-                        const toast = new bootstrap.Toast(toastElement);
-                        toast.show();
-                    };
-                }
-            });
-        });
-
-    });
-</script> -->
 <script>
 let paymentCompleted = false;
 

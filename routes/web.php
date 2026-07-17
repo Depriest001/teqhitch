@@ -24,7 +24,11 @@ use App\Http\Controllers\Admin\SystemSettingController;
 use App\Http\Controllers\Admin\TopicController; 
 use App\Http\Controllers\Admin\PapersController;
 use App\Http\Controllers\Admin\TopicPaymentController;
+use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\NewslettersController;
+use App\Http\Controllers\Admin\TestimonyController;
+use App\Http\Controllers\Admin\TeamController;
+use App\Http\Controllers\Admin\EnrollmentApplicationController;
 
 // staff
 use App\Http\Controllers\Staff\StaffDashboardController;
@@ -50,8 +54,11 @@ Route::controller(\App\Http\Controllers\View\ViewController::class)->group(funct
     Route::get('/', 'index')->name('home');
     Route::get('/about', 'about')->name('about');
     Route::get('/contact', 'contact')->name('contact');
-    Route::get('/services', 'services')->name('services');
-    Route::get('/services/{slug}', 'serviceDetail')->name('service.show');
+    Route::get('/courses', 'services')->name('services');
+    Route::get('/news', 'news')->name('news');
+    Route::get('/news/{news}', 'newsdetail')->name('news.detail');
+    Route::get('/enroll', 'enroll')->name('enroll');
+    Route::post('/enroll/store', 'storeEnroll')->name('enroll.store');
 });
 
 // subscriber
@@ -209,6 +216,12 @@ Route::prefix('admin')
 
         Route::get('newsletter/{newsletter}/send', [NewslettersController::class, 'send'])
             ->name('newsletter.send');
+        
+        Route::patch('team-members/{teamMember}/toggle-status', [TeamController::class, 'toggleStatus'])
+            ->name('team.toggle-status');
+
+        Route::patch('testimonies/{testimony}/toggle-status', [TestimonyController::class, 'toggleStatus'])
+            ->name('testimonies.toggle');
             
         // Resources
         Route::resources([
@@ -220,8 +233,19 @@ Route::prefix('admin')
             'transaction' => AdminTransactionController::class,
             'announcement' => AdminAnnouncementController::class,
             'topics' => TopicController::class,
+            'news' => NewsController::class,
             'newsletter' => NewslettersController::class,
+            'testimony' => TestimonyController::class,
+            'team' => TeamController::class,
+            'enrollments' => EnrollmentApplicationController::class
         ]);
+
+        Route::get('enrollments-export', [EnrollmentApplicationController::class, 'exportAll'])
+            ->name('enrollments.export');
+        Route::get('enrollments-export-filtered', [EnrollmentApplicationController::class, 'exportFiltered'])
+            ->name('enrollments.exportFiltered');
+        Route::post('enrollments-bulk-action', [EnrollmentApplicationController::class, 'bulkAction'])
+            ->name('enrollments.bulkAction');
     });
 
 // =====================

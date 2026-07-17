@@ -145,6 +145,33 @@
                 @enderror
             </div>
 
+            {{-- Category --}}
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Category *</label>
+                <input type="text" name="category"
+                        class="form-control @error('category') is-invalid @enderror"
+                        value="{{ old('category') }}"
+                        placeholder="e.g. Web Development">
+
+                @error('category')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+
+            {{-- Level --}}
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Level *</label>
+                <select name="level" class="form-select @error('level') is-invalid @enderror">
+                    <option disabled selected>-- Select Level --</option>
+                    <option value="Beginner" {{ old('level') == 'Beginner' ? 'selected' : '' }}>Beginner</option>
+                    <option value="Intermediate" {{ old('level') == 'Intermediate' ? 'selected' : '' }}>Intermediate</option>
+                    <option value="Advanced" {{ old('level') == 'Advanced' ? 'selected' : '' }}>Advanced</option>
+                </select>
+                @error('level')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+            </div>
+
             {{-- Thumbnail --}}
             <div class="col-md-6 mb-3">
                 <label class="form-label">Upload Thumbnail *</label>
@@ -179,36 +206,14 @@
                 @enderror
             </div>
 
-            {{-- Overview --}}
-            <div class="mb-3">
-                <label class="form-label">Course Overview</label>
-                <textarea name="overview"  id="editor"
-                    class="form-control @error('overview') is-invalid @enderror"
-                    rows="4">{{ old('overview') }}</textarea>
-
-                @error('overview')
-                    <small class="text-danger">{{ $message }}</small>
-                @enderror
-            </div>
-
             <hr>
-            <h5 class="mt-4">Course Features</h5>
-
-            <div id="featuresWrapper"></div>
-
-            <div class="mb-3">
-                <button type="button" class="btn btn-sm btn-outline-primary"
-                        onclick="addFeature()">+ Add Feature</button>
-            </div>
-
-            <hr>
-            <h5 class="mt-4">Course Outcomes</h5>
+            <h5 class="mt-4">Course Curriculum</h5>
 
             <div id="outcomesWrapper"></div>
 
             <div class="mb-3">
                 <button type="button" class="btn btn-sm btn-outline-success"
-                        onclick="addOutcome()">+ Add Outcome</button>
+                        onclick="addOutcome()">+ Add Curriculum</button>
             </div>
 
             {{-- Submit --}}
@@ -221,14 +226,6 @@
         </form>
     </div>
 </div>
-
-{{-- CKEditor --}}
-<script src="https://cdn.ckeditor.com/ckeditor5/38.1.1/classic/ckeditor.js"></script>
-<script>
-ClassicEditor
-    .create(document.querySelector('#editor'))
-    .catch(error => console.error(error));
-</script>
 
 {{-- Thumbnail Preview --}}
 <script>
@@ -245,25 +242,7 @@ document.getElementById('thumbnailInput').addEventListener('change', function (e
 
 {{-- Dynamic Features & Outcomes --}}
 <script>
-let featureIndex = 0;
 let outcomeIndex = 0;
-
-function addFeature() {
-    let html = `
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <input type="text" name="features[${featureIndex}][title]" class="form-control" placeholder="Feature Title">
-            </div>
-            <div class="col-md-4">
-                <input type="text" name="features[${featureIndex}][description]" class="form-control" placeholder="Feature Description">
-            </div>
-            <div class="col-md-3">
-                <input type="text" name="features[${featureIndex}][icon]" class="form-control" placeholder="Icon class (optional)">
-            </div>
-        </div>`;
-    document.getElementById('featuresWrapper').insertAdjacentHTML('beforeend', html);
-    featureIndex++;
-}
 
 function addOutcome() {
     let html = `

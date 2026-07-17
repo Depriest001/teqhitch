@@ -7,7 +7,6 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\User;
 use App\Models\Assignment;
-use App\Models\CourseFeature;
 use App\Models\CourseOutcome;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -45,7 +44,6 @@ class AdminCoursesController extends Controller
                 'modules' => function ($query) {
                     $query->withCount('assignments'); // counts assignments per module
                 },
-                'features',
                 'outcomes',
                 'recentEnrollments.student'
             ])
@@ -82,6 +80,7 @@ class AdminCoursesController extends Controller
                 ->values()
                 ->toArray(),
         ]);
+        
         $validated = $request->validate([
             'title'         => 'required|string|max:255|unique:courses,title',
             'subtitle'      => 'nullable|string|max:255',
@@ -89,15 +88,10 @@ class AdminCoursesController extends Controller
             'duration'      => 'required|string|max:255',
             'instructor_id' => 'required|exists:users,id',
             'description'   => 'required|string',
-            'overview'      => 'nullable|string',
             'thumbnail'     => 'required|image|mimes:png,jpg,jpeg,webp|max:2048',
-            'icon'      => 'nullable|string|max:255',
-
-            // Features validation
-            'features'                  => 'nullable|array',
-            'features.*.title'          => 'required|string|max:255',
-            'features.*.description'    => 'required|string|max:500',
-            'features.*.icon'           => 'nullable|string|max:255',
+            'icon'          => 'nullable|string|max:255',
+            'category'      => 'required|string|max:255',
+            'level'         => 'required|string|max:255',
 
             // Outcomes validation
             'outcomes'                  => 'required|array',
@@ -117,7 +111,7 @@ class AdminCoursesController extends Controller
             $filename = uniqid().'_'.time().'.'.$request->thumbnail->extension();
             $request->thumbnail->move($destinationPath, $filename);
 
-            // Save path to database (optional)
+            // Save path to database
             $path = 'courses/' . $filename;
 
             // Create Course (Slug auto-generated in Model)
@@ -128,32 +122,16 @@ class AdminCoursesController extends Controller
                 'duration'      => $validated['duration'],
                 'instructor_id' => $validated['instructor_id'],
                 'description'   => $validated['description'],
-                'overview'      => $validated['overview'] ?? null,
                 'thumbnail'     => $path,
-                'icon'      => $validated['icon'] ?? null,
+                'icon'          => $validated['icon'] ?? null,
+                'category'      => $validated['category'],
+                'level'         => $validated['level'],
             ]);
-            $features = collect($request->features)
-                ->filter(function ($feature) {
-                    return !empty($feature['title']) && !empty($feature['description']);
-                });
-
+            
             $outcomes = collect($request->outcomes)
                 ->filter(function ($outcome) {
                     return !empty($outcome['content']);
                 });
-
-            // Save Features
-            if (!empty($validated['features'])) {
-                foreach ($validated['features'] as $index => $feature) {
-                    $course->features()->create([
-                        'title'       => $feature['title'],
-                        'description' => $feature['description'],
-                        'icon'        => $feature['icon'] ?? null,
-                        'position'    => $index,
-                        'status'      => true,
-                    ]);
-                }
-            }
 
             // Save Outcomes
             if (!empty($validated['outcomes'])) {
@@ -184,7 +162,6 @@ class AdminCoursesController extends Controller
     public function edit($id)
     {
         $course = Course::with([
-                'features',
                 'outcomes',
                 'instructor'
             ])
@@ -209,18 +186,13 @@ class AdminCoursesController extends Controller
             'subtitle'      => 'nullable|string|max:255',
             'instructor_id' => 'nullable|exists:users,id',
             'description'   => 'nullable|string',
-            'overview'      => 'nullable|string',
             'price'         => 'nullable|numeric|min:0',
             'duration'      => 'required|string|max:255',
             'status'        => 'required|in:draft,published',
             'thumbnail'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'icon'          => 'nullable|string|max:255',
-
-            'features'                  => 'nullable|array',
-            'features.*.id'             => 'nullable|exists:course_features,id',
-            'features.*.title'          => 'nullable|string|max:255',
-            'features.*.description'    => 'nullable|string|max:500',
-            'features.*.icon'           => 'nullable|string|max:255',
+            'category'      => 'required|string|max:255',
+            'level'         => 'required|string|max:255',
 
             'outcomes'                  => 'nullable|array',
             'outcomes.*.id'             => 'nullable|exists:course_outcomes,id',
@@ -260,55 +232,8 @@ class AdminCoursesController extends Controller
                 $validated['thumbnail'] = 'courses/' . $filename;
             }
 
-            // Remove features/outcomes from main update array
-            unset($validated['features'], $validated['outcomes']);
-
             // Update course (slug handled automatically in model)
             $course->update($validated);
-
-            /*
-            |--------------------------------------------------------------------------
-            | FEATURES SYNC
-            |--------------------------------------------------------------------------
-            */
-
-            $existingFeatureIds = [];
-
-            if ($request->features) {
-
-                foreach ($request->features as $index => $feature) {
-
-                    // Skip completely empty rows
-                    if (empty($feature['title']) || empty($feature['description'])) {
-                        continue;
-                    }
-
-                    $courseFeature = $course->features()->updateOrCreate(
-                        ['id' => $feature['id'] ?? null],
-                        [
-                            'title'       => $feature['title'],
-                            'description' => $feature['description'],
-                            'icon'        => $feature['icon'] ?? null,
-                            'position'    => $index,
-                            'status'      => 1,
-                        ]
-                    );
-
-                    $existingFeatureIds[] = $courseFeature->id;
-                }
-            }
-
-            // Delete removed features
-           if ($request->has('features')) {
-                $submittedIds = collect($request->features)
-                    ->pluck('id')
-                    ->filter()
-                    ->toArray();
-
-                $course->features()
-                    ->whereNotIn('id', $submittedIds)
-                    ->delete();
-            }
 
             /*
             |--------------------------------------------------------------------------

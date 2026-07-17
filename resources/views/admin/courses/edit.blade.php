@@ -69,9 +69,14 @@
 
                 <h5 class="mb-0 mt-2">{{ $course->title }}</h5>
 
-                <span class="text-muted">
+                <span class="text-muted d-block">
                     Instructor: {{ $course->instructor->name ?? 'Not Assigned' }}
                 </span>
+
+                <div class="mt-2">
+                    <span class="badge bg-light text-dark border me-1">{{ $course->category ?? 'No Category' }}</span>
+                    <span class="badge bg-light text-primary border">{{ $course->level ?? 'No Level' }}</span>
+                </div>
 
                 <div class="mt-3">
                     <span class="badge 
@@ -162,6 +167,30 @@
                             </select>
                         </div>
 
+                        {{-- Category --}}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Category *</label>
+                            <input type="text" name="category"
+                                   value="{{ old('category', $course->category) }}"
+                                   class="form-control @error('category') is-invalid @enderror"
+                                   placeholder="e.g. Web">
+                        </div>
+
+                        {{-- Level --}}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Level *</label>
+                            <select name="level" class="form-select @error('level') is-invalid @enderror">
+                                <option disabled>-- Select Level --</option>
+                                <option value="beginner" {{ strtolower(old('level', $course->level)) == 'beginner' ? 'selected' : '' }}>Beginner</option>
+                                <option value="intermediate" {{ strtolower(old('level', $course->level)) == 'intermediate' ? 'selected' : '' }}>Intermediate</option>
+                                <option value="advanced" {{ strtolower(old('level', $course->level)) == 'advanced' ? 'selected' : '' }}>Advanced</option>
+                            </select>
+
+                            @error('level')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
                         {{-- Icon and Thumbnail --}}
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Icon</label>
@@ -185,51 +214,12 @@
                             <textarea name="description" rows="4" class="form-control">{{ old('description', $course->description) }}</textarea>
                         </div>
 
-                        {{-- Overview --}}
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Overview</label>
-                            <textarea name="overview" class="form-control" id="editor">
-                                {{ old('overview', $course->overview) }}
-                            </textarea>
-                        </div>
-
                     </div>
-
-                    {{-- ================= Features ================= --}}
                     <hr>
-                    <h5>Course Features</h5>
 
-                    <div id="featuresWrapper">
-                        @foreach($course->features as $index => $feature)
-                            <div class="row mb-3">
-                                <input type="hidden" name="features[{{ $index }}][id]" value="{{ $feature->id }}">
-                                <div class="col-md-4">
-                                    <input type="text"
-                                           name="features[{{ $index }}][title]"
-                                           value="{{ $feature->title }}"
-                                           class="form-control">
-                                </div>
-                                <div class="col-md-4">
-                                    <input type="text"
-                                           name="features[{{ $index }}][description]"
-                                           value="{{ $feature->description }}"
-                                           class="form-control">
-                                </div>
-                                <div class="col-md-3">
-                                    <input type="text"
-                                           name="features[{{ $index }}][icon]"
-                                           value="{{ $feature->icon }}"
-                                           class="form-control">
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <button type="button" class="btn btn-sm btn-outline-primary mb-3" onclick="addFeature()">+ Add Feature</button>
-
-                    {{-- ================= Outcomes ================= --}}
+                    {{-- ================= Curriculum ================= --}}
                     <hr>
-                    <h5>Course Outcomes</h5>
+                    <h5>Course Curriculum</h5>
 
                     <div id="outcomesWrapper">
                         @foreach($course->outcomes as $index => $outcome)
@@ -245,7 +235,7 @@
                         @endforeach
                     </div>
 
-                    <button type="button" class="btn btn-sm btn-outline-success mb-3" onclick="addOutcome()">+ Add Outcome</button>
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="addOutcome()">+ Add Outcome</button>
 
                     <div class="d-flex justify-content-end gap-2">
                         <button class="btn btn-primary">
@@ -259,12 +249,6 @@
 
     </div>
 </div>
-
-{{-- CKEditor --}}
-<script src="https://cdn.ckeditor.com/ckeditor5/38.1.1/classic/ckeditor.js"></script>
-<script>
-ClassicEditor.create(document.querySelector('#editor'));
-</script>
 
 {{-- Image Preview --}}
 <script>
@@ -280,25 +264,7 @@ document.getElementById('thumbnailInput').addEventListener('change', function (e
 
 {{-- Dynamic Add --}}
 <script>
-let featureIndex = {{ $course->Features->count() }};
 let outcomeIndex = {{ $course->outcomes->count() }};
-
-function addFeature() {
-    let html = `
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <input type="text" name="features[${featureIndex}][title]" class="form-control" placeholder="Feature Title">
-            </div>
-            <div class="col-md-4">
-                <input type="text" name="features[${featureIndex}][description]" class="form-control" placeholder="Feature Description">
-            </div>
-            <div class="col-md-3">
-                <input type="text" name="features[${featureIndex}][icon]" class="form-control" placeholder="Icon">
-            </div>
-        </div>`;
-    document.getElementById('featuresWrapper').insertAdjacentHTML('beforeend', html);
-    featureIndex++;
-}
 
 function addOutcome() {
     let html = `

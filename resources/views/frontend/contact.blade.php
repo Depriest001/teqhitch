@@ -7,9 +7,9 @@
         <div class="container pt-5">
             <div class="row g-5 pt-5">
                 <div class="col-lg-6 align-self-center text-center text-lg-start mb-lg-5">
-                    <h1 class="display-4 text-white mb-4 animated slideInRight">Contact Us</h1>
+                    <h2 class="text-white mb-4 animated slideInUp">Contact Us</h2>
                     <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb justify-content-center justify-content-lg-start mb-0">
+                        <ol class="breadcrumb justify-content-center justify-content-lg-start mb-0 animated slideInUp">
                             <li class="breadcrumb-item"><a class="text-white" href="{{route('home')}}">Home</a></li>
                             <li class="breadcrumb-item text-white active" aria-current="page">Contact Us</li>
                         </ol>
@@ -26,25 +26,25 @@
             <div class="row">
                 <div class="col-lg-5 wow fadeIn" data-wow-delay="0.1s">
                     <div class="info-item d-flex">
-                        <i class="bi bi-geo-alt flex-shrink-0 h4"></i>
+                        <i class="bi bi-geo-alt flex-shrink-0 h6"></i>
                         <div>
-                            <h4>Address</h4>
+                            <h6>Address</h6>
                             <p>Equity Lodge Ishieke Market, Ebonyi state, Nigeria.</p>
                         </div>
                     </div><!-- End Info Item -->
 
                     <div class="info-item d-flex">
-                        <i class="bi bi-telephone flex-shrink-0 h4"></i>
+                        <i class="bi bi-telephone flex-shrink-0 h6"></i>
                         <div>
-                            <h4>Call Us</h4>
+                            <h6>Call Us</h6>
                             <p><a href="tel:+234 816 658 2751">+234 816 658 2751</a></p>
                         </div>
                     </div><!-- End Info Item -->
 
                     <div class="info-item d-flex">
-                        <i class="bi bi-envelope flex-shrink-0 h4 me-1"></i>
+                        <i class="bi bi-envelope flex-shrink-0 h6 me-1"></i>
                         <div>
-                            <h4>Email Us</h4>
+                            <h6>Email Us</h6>
                             <p><a href="mailto:support@teqhitch.com">support@teqhitch.com</a></p>
                         </div>
                     </div><!-- End Info Item -->
