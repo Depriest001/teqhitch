@@ -19,6 +19,7 @@ class TeamController extends Controller
         // ✅ 1. Validate
         $request->validate([
             'fullname' => 'required|string|max:255',
+            'bio' => 'required|string',
             'position' => 'required|string|unique:team_members,position|max:255',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
 
@@ -53,6 +54,7 @@ class TeamController extends Controller
         // ✅ 3. Save to DB
         TeamMember::create([
             'fullname' => $request->fullname,
+            'bio' => $request->bio,
             'position' => $request->position,
             'image' => $imagePath,
 
@@ -84,6 +86,7 @@ class TeamController extends Controller
     {
         $request->validate([
             'fullname' => 'required|string|max:255',
+            'bio' => 'required|string',
             'position' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
 
@@ -118,6 +121,7 @@ class TeamController extends Controller
         // Update other fields
         $team->update([
             'fullname' => $request->fullname,
+            'bio' => $request->bio,
             'position' => $request->position,
             'facebook' => $request->facebook,
             'twitter' => $request->twitter,

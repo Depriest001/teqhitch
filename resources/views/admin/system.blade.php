@@ -196,85 +196,77 @@
     <div class="row">
         <div class="col-md-6">            
 
-            <!-- EMAIL SMTP -->
+            <!-- SOCIAL LINKS -->
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bx bx-envelope text-primary"></i> Email SMTP Settings</h5>
+                    <h5 class="mb-0"><i class="bx bx-share-alt text-primary"></i> Social Links</h5>
                 </div>
                 <div class="card-body">
 
-                    <form action="{{ route('admin.email.settings.update') }}" 
-                        method="POST" 
+                    <form action="{{ route('admin.system.settings.social.links') }}"
+                        method="POST"
                         class="row">
                         @csrf
                         @method('PATCH')
 
-                        <div class="col-md-6 mb-3">
-                            <label>Mail Driver</label>
-                            <input name="mail_driver" class="form-control"
-                                value="{{ old('mail_driver', $email->mail_driver) }}"
-                                placeholder="smtp">
-                        </div>
+                        @php
+                            $social = $settings->social_links ?? [];
+                        @endphp
 
                         <div class="col-md-6 mb-3">
-                            <label>Mail Host</label>
-                            <input name="host" class="form-control"
-                                value="{{ old('host', $email->host) }}"
-                                placeholder="smtp.gmail.com">
+                            <label><i class="bx bxl-facebook-circle"></i> Facebook</label>
+                            <input name="facebook" class="form-control"
+                                value="{{ old('facebook', $social['facebook'] ?? '') }}"
+                                placeholder="https://facebook.com/yourpage">
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label>Mail Port</label>
-                            <input name="port" class="form-control"
-                                value="{{ old('port', $email->port) }}"
-                                placeholder="465 or 587">
+                            <label><i class="bx bxl-twitter"></i> Twitter / X</label>
+                            <input name="twitter" class="form-control"
+                                value="{{ old('twitter', $social['twitter'] ?? '') }}"
+                                placeholder="https://x.com/yourhandle">
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label>Encryption</label>
-                            <select name="encryption" class="form-select">
-                                <option value="ssl" {{ $email->encryption=='ssl'?'selected':'' }}>ssl</option>
-                                <option value="tls" {{ $email->encryption=='tls'?'selected':'' }}>tls</option>
-                            </select>
+                            <label><i class="bx bxl-instagram"></i> Instagram</label>
+                            <input name="instagram" class="form-control"
+                                value="{{ old('instagram', $social['instagram'] ?? '') }}"
+                                placeholder="https://instagram.com/yourpage">
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label>Mail Username</label>
-                            <input name="username" class="form-control"
-                                value="{{ old('username', $email->username) }}"
-                                placeholder="email@domain.com">
+                            <label><i class="bx bxl-linkedin"></i> LinkedIn</label>
+                            <input name="linkedin" class="form-control"
+                                value="{{ old('linkedin', $social['linkedin'] ?? '') }}"
+                                placeholder="https://linkedin.com/company/yourpage">
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label>Mail Password</label>
-                            <input name="password" class="form-control" type="password"
-                                placeholder="Leave empty to keep current password">
+                            <label><i class="bx bxl-youtube"></i> YouTube</label>
+                            <input name="youtube" class="form-control"
+                                value="{{ old('youtube', $social['youtube'] ?? '') }}"
+                                placeholder="https://youtube.com/@yourchannel">
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label>From Email</label>
-                            <input name="from_address" class="form-control"
-                                value="{{ old('from_address', $email->from_address) }}">
+                            <label><i class="bx bxl-tiktok"></i> TikTok</label>
+                            <input name="tiktok" class="form-control"
+                                value="{{ old('tiktok', $social['tiktok'] ?? '') }}"
+                                placeholder="https://tiktok.com/@yourhandle">
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label>From Name</label>
-                            <input name="from_name" class="form-control"
-                                value="{{ old('from_name', $email->from_name) }}">
+                            <label><i class="bx bxl-whatsapp"></i> WhatsApp</label>
+                            <input name="whatsapp" class="form-control"
+                                value="{{ old('whatsapp', $social['whatsapp'] ?? '') }}"
+                                placeholder="https://wa.me/2348012345678">
                         </div>
 
-                        <div class="col-md-12 mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox"
-                                    name="is_active" value="1"
-                                    {{ $email->is_active ? 'checked' : '' }}>
-                                <label class="form-check-label">Enable SMTP</label>
-                            </div>
+                        <div class="col-md-12">
+                            <button class="btn btn-primary w-100">
+                                <i class="bx bx-save"></i> Update Social Links
+                            </button>
                         </div>
-
-                        <button class="btn btn-primary w-100">
-                            <i class="bx bx-save"></i> Update Email Settings
-                        </button>
                     </form>
 
                 </div>

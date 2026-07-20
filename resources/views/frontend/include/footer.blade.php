@@ -52,14 +52,57 @@
                     <p class="small"><i class="fa fa-map-marker-alt me-3"></i>
                         {{ $globalSetting->address }}
                     </p>
+                    
                     <p class="small"><i class="fa fa-phone-alt me-3"></i>{{ $globalSetting->support_phone }}</p>
                     <p class="small"><i class="fa fa-envelope me-3"></i>{{ $globalSetting->support_email }}</p>
-                    <div class="d-flex pt-2">
-                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
-                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
-                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-youtube"></i></a>
-                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-instagram"></i></a>
-                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
+
+                    @php
+                        $social = $globalSetting->social_links ?? [];
+                    @endphp
+                    <div class="d-flex flex-wrap pt-2">
+                        @if(!empty($social['twitter']))
+                            <a class="btn btn-outline-light btn-social" href="{{ $social['twitter'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['facebook']))
+                            <a class="btn btn-outline-light btn-social" href="{{ $social['facebook'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['youtube']))
+                            <a class="btn btn-outline-light btn-social" href="{{ $social['youtube'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['instagram']))
+                            <a class="btn btn-outline-light btn-social" href="{{ $social['instagram'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['linkedin']))
+                            <a class="btn btn-outline-light btn-social" href="{{ $social['linkedin'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['tiktok']))
+                            <a class="btn btn-outline-light btn-social d-inline-flex align-items-center justify-content-center" href="{{ $social['tiktok'] }}" target="_blank" rel="noopener">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 448 512">
+                                    <path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a72.59,72.59,0,1,0,50.23,69.63V0h90.08a101.58,101.58,0,0,0,10.6,43.43,103.54,103.54,0,0,0,76.54,58.46V209.91Z"/>
+                                </svg>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['whatsapp']))
+                            <a class="btn btn-outline-light btn-social" href="{{ $social['whatsapp'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        @endif
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3 wow fadeIn" data-wow-delay="0.5s">
@@ -68,13 +111,16 @@
                     <a class="btn btn-link small" href="{{route('contact')}}">Contact Us</a>
                     <a class="btn btn-link small" href="{{route('services')}}">Courses</a>
                     <a class="btn btn-link small" href="{{route('news')}}">News</a>
+                    <a class="btn btn-link small" href="{{route('products')}}">Products</a>
                 </div>
                 <div class="col-md-6 col-lg-3 wow fadeIn" data-wow-delay="0.7s">
-                    <h5 class="text-white mb-4">Our Services</h5>
-                    <a class="btn btn-link small" href="#">Robotic Automation</a>
-                    <a class="btn btn-link small" href="#">Machine learning</a>
-                    <a class="btn btn-link small" href="#">Data Science</a>
-                    <a class="btn btn-link small" href="#">Robot Technology</a>
+                    <h5 class="text-white mb-4">Our Programs</h5>
+                    @forelse($globalcourses as $course)
+                        <a class="btn btn-link small" href="{{route('services')}}">{{ $course->title ?? ''}}</a>
+                    @empty
+                        <a class="btn btn-link small" href="{{route('services')}}">No programs yet</a>
+                    @endforelse
+                    
                 </div>
             </div>
         </div>

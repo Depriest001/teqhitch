@@ -9,6 +9,8 @@ use App\Models\TeamMember;
 use App\Models\Testimony;
 use App\Models\News;
 use App\Models\EnrollmentApplication;
+use App\Models\Product;
+use App\Models\Gallery;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 
@@ -22,7 +24,6 @@ class ViewController extends Controller
             ->get();
 
         $team = TeamMember::active()
-            ->latest()
             ->take(4)
             ->get();
 
@@ -35,6 +36,16 @@ class ViewController extends Controller
             ->latest()
             ->take(6)
             ->get();
+        
+        $products = Product::active()
+            ->latest()
+            ->take(3)
+            ->get();
+
+        $gallerys = Gallery::active()
+            ->latest()
+            ->take(6)
+            ->get();
 
         // ===== SYSTEM INFO FROM DB =====
         $systemInfo = SystemInfo::first();
@@ -44,6 +55,8 @@ class ViewController extends Controller
             'team',
             'testimonies',
             'news',
+            'products',
+            'gallerys',
             'systemInfo'
         ));
     }
@@ -59,7 +72,8 @@ class ViewController extends Controller
     }
 
     public function contact() {
-        return view('frontend.contact');
+        $systemInfo = SystemInfo::first();
+        return view('frontend.contact', compact('systemInfo'));
     }
 
     public function services() {
@@ -74,6 +88,11 @@ class ViewController extends Controller
     public function news() {
         $news = News::published()->latest()->take(9)->get();
         return view('frontend.news', compact('news'));
+    }
+
+    public function products() {
+        $products = Product::active()->latest()->get();
+        return view('frontend.products', compact('products'));
     }
 
     public function newsdetail(News $news) {

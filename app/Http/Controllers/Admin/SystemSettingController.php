@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use App\Models\SystemInfo;
-use App\Models\EmailSetting;
 use Illuminate\Http\Request;
 
 class SystemSettingController extends Controller
@@ -13,8 +12,7 @@ class SystemSettingController extends Controller
     public function edit()
     {
         $settings = SystemInfo::first();  // assuming single row
-        $email = EmailSetting::first();
-        return view('admin.system', compact('settings', 'email'));
+        return view('admin.system', compact('settings'));
     }
     
     public function updateinfo(Request $request)
@@ -38,6 +36,27 @@ class SystemSettingController extends Controller
         ]);
 
         return back()->with('success', 'System settings updated successfully!');
+    }
+
+    public function updateSocialLinks(Request $request)
+    {
+        $validated = $request->validate([
+            'facebook'  => 'nullable|url',
+            'twitter'   => 'nullable|url',
+            'instagram' => 'nullable|url',
+            'linkedin'  => 'nullable|url',
+            'youtube'   => 'nullable|url',
+            'tiktok'    => 'nullable|url',
+            'whatsapp'  => 'nullable|url',
+        ]);
+
+        $system = SystemInfo::first(); // or however you fetch the singleton row
+
+        $system->update([
+            'social_links' => $validated,
+        ]);
+
+        return back()->with('success', 'Social links updated successfully.');
     }
     
     public function updateBranding(Request $request)
@@ -100,45 +119,6 @@ class SystemSettingController extends Controller
         $settings->save();
 
         return back()->with('success', 'Branding updated successfully!');
-    }
-
-    public function updatemail(Request $request)
-    {
-        $request->validate([
-            'mail_driver'   => 'required|string|max:50',
-            'host'          => 'required|string|max:255',
-            'port'          => 'required|integer',
-            'encryption'    => 'nullable|in:ssl,tls',
-            'username'      => 'nullable|string|max:255',
-            'password'      => 'nullable|string|max:255',
-            'from_address'  => 'nullable|email',
-            'from_name'     => 'nullable|string|max:255',
-            'is_active'     => 'nullable|boolean',
-        ]);
-
-        $settings = EmailSetting::first();
-
-        $data = $request->only([
-            'mail_driver',
-            'host',
-            'port',
-            'username',
-            'encryption',
-            'from_address',
-            'from_name',
-        ]);
-
-        // Checkbox handling
-        $data['is_active'] = $request->has('is_active');
-
-        // Only update password if entered
-        if ($request->filled('password')) {
-            $data['password'] = $request->password;
-        }
-
-        $settings->update($data);
-
-        return back()->with('success', 'Email settings updated successfully!');
     }
 
     public function updateAbout(Request $request)

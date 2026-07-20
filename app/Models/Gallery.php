@@ -5,19 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TeamMember extends Model
+class Gallery extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
-        'fullname',
-        'bio',
-        'position',
+        'title',
         'image',
-        'facebook',
-        'twitter',
-        'instagram',
-        'linkedin',
         'status',
     ];
 

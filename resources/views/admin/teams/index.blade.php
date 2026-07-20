@@ -39,6 +39,7 @@
             </div>
         </div>
     @endif
+
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -61,12 +62,16 @@
 
                     <div class="card-body text-center">
 
-                        <img src="{{ $member->image ? asset('storage/' . $member->image) : asset('assets/img/user/icon-male.png') }}"
+                        <img src="{{ $member->image ? asset('uploads/' . $member->image) : asset('assets/img/user/icon-male.png') }}"
                             class="rounded-circle mb-3"
                             width="80" height="80">
 
                         <h5 class="mb-1">{{ $member->fullname }}</h5>
                         <small class="text-muted">{{ $member->position }}</small>
+
+                        @if($member->bio)
+                            <p class="text-muted small mt-2 mb-0">{{ Str::limit($member->bio, 80) }}</p>
+                        @endif
 
                         <div class="mt-2">
                             <span class="badge {{ $member->status ? 'bg-success' : 'bg-danger' }}">
@@ -158,6 +163,12 @@
             <div class="mb-3">
                 <label class="form-label">Full Name</label>
                 <input type="text" class="form-control" name="fullname" placeholder="Enter full name" required>
+            </div>
+
+            <!-- Bio -->
+            <div class="mb-3">
+                <label class="form-label" for="bio">Bio</label>
+                <textarea name="bio" id="bio" class="form-control" rows="3" placeholder="Write a short bio..."></textarea>
             </div>
 
             <!-- Position -->

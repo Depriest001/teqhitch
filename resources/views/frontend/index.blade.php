@@ -1,8 +1,91 @@
 @extends('frontLayout')
 @section('title','Home - Teqhitch ICT Academy LTD')
 @section('content')
+
+    <style>
+        .gallery-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bs-primary, #0d6efd);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            z-index: 10;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .gallery-nav-btn:hover {
+            background: #fff;
+            color: var(--bs-primary, #0d6efd);
+        }
+        .gallery-prev {
+            left: -22px;
+        }
+        .gallery-next {
+            right: -22px;
+        }
+		.hero-content h1{
+			font-size: 2.5em !important;
+		}
+        @media (max-width: 767px) {
+            .gallery-prev { left: 0; }
+            .gallery-next { right: 0; }
+			
+			.hero-content h1{
+				font-size: 2em !important;
+			}
+        }
+
+        .marquee-section {
+            overflow: hidden;
+        }
+        .marquee-wrap {
+            width: 100%;
+            overflow: hidden;
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+        }
+        .marquee-track {
+            display: flex;
+            align-items: center;
+            width: max-content;
+            animation: marquee-scroll 30s linear infinite;
+        }
+        .marquee-wrap:hover .marquee-track {
+            animation-play-state: paused;
+        }
+        .marquee-logo {
+            flex: 0 0 auto;
+            padding: 0 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .marquee-logo img {
+            height: 38px;
+            width: auto;
+            max-width: 120px;
+            object-fit: contain;
+        }
+        @keyframes marquee-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        @media (max-width: 767px) {
+            .marquee-logo { padding: 0 20px; }
+            .marquee-logo img { height: 28px; }
+        }
+    </style>
+
     <!-- Hero Start -->
-    <div id="heroCarousel" class="carousel carousel-fade hero-carousel hero-header mb-5" data-bs-ride="carousel" data-bs-interval="9000">
+    <div id="heroCarousel" class="carousel carousel-fade hero-carousel hero-header mb-3 mb-md-5" data-bs-ride="carousel" data-bs-interval="9000">
         <div class="carousel-indicators custom-indicators">
             <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
             <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
@@ -19,7 +102,7 @@
                         <p class="fadeInUp" data-wow-delay="0.5s">
                             We provides cutting-edge digital skills, IT training, and professional certifications — shaping the future of Nigeria's tech workforce
                         </p>
-                        <h1 class="fadeInUp" style="font-size: 2.5em !important;" data-wow-delay="1.2s">
+                        <h1 class="fadeInUp" data-wow-delay="1.2s">
                             Start Your <span>Tech Journey</span> Today
                         </h1>
                         <a href="{{ route('register') }}" class="btn btn-outline-primary btn-register fadeInUp" data-wow-delay="1.9s">
@@ -31,12 +114,12 @@
             </div>
 
             <!-- Slide 2 -->
-            <div class="carousel-item" style="background-image:url('https://media.istockphoto.com/id/2215674535/photo/young-asian-software-development-manager-leads-a-late-night-office-discussion-with-his.jpg?s=1024x1024&w=is&k=20&c=-TFYnQd_lOxTqguzADyQOOkwBP8sCFusr5njZ79kGds=');">
+            <div class="carousel-item" style="background-image:url('https://plus.unsplash.com/premium_photo-1682141007707-1f09c5a1d814?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cHJvZ3JhbW1pbmclMjBjb2RlJTIwY2xhc3N8ZW58MHx8MHx8fDA%3D');">
                 <div class="overlay"></div>
                 <div class="container h-100 d-flex align-items-center">
                     <div class="hero-content text-center">
                     <p class="fadeInUp" data-wow-delay="0.5s">Learn practical and in-demand digital skills.</p>
-                    <h1 class="fadeInUp" style="font-size: 2.5em !important;" data-wow-delay="1.2s">Gain <span>TECH SKILLS</span>That Earn Real Income</h1>
+                    <h1 class="fadeInUp" data-wow-delay="1.2s">Gain <span>Tech Skills</span> That Earn Real Income</h1>
                     <a href="{{ route('services') }}" class="btn btn-outline-primary btn-register fadeInUp" data-wow-delay="1.9s">
                         Explore Courses
                         <span class="btn"><i class="fa fa-arrow-right"></i></span>
@@ -51,7 +134,7 @@
                 <div class="container h-100 d-flex align-items-center">
                     <div class="hero-content text-center">
                     <p class="fadeInUp" data-wow-delay="0.5s">Start your journey into technology today.</p>
-                    <h1 class="fadeInUp" style="font-size: 2.5em !important;" data-wow-delay="1.2s">From <span>BEGINNER</span> to Industry Ready</h1>
+                    <h1 class="fadeInUp" data-wow-delay="1.2s">From <span>Beginner</span> to Industry Ready</h1>
                     <a href="{{ route('enroll') }}" class="btn btn-outline-primary btn-register fadeInUp" data-wow-delay="1.9s">
                         Get Started
                         <span class="btn"><i class="fa fa-arrow-right"></i></span>
@@ -63,6 +146,44 @@
         </div>
     </div>
     <!-- Hero End -->
+
+    <!-- Trusted By / Tech Marquee Start -->
+    <div class="container-fluid marquee-section py-3">
+        <div class="container text-center mb-3 wow fadeIn" data-wow-delay="0.1s">
+            <span class="font-mono uppercase text-muted d-block">Trusted By Leading Organizations</span>
+        </div>
+
+        <div class="marquee-wrap">
+            <div class="marquee-track">
+                <!-- Set 1 -->
+                <div class="marquee-logo"><img src="https://www.vectorlogo.zone/logos/google/google-icon.svg" alt="Google"></div>
+                <div class="marquee-logo"><img src="https://uhf.microsoft.com/images/microsoft/RE1Mu3b.png" alt="Microsoft"></div>
+                <div class="marquee-logo"><img src="https://www.adobe.com/cc-shared/assets/img/product-icons/svg/adobe-corp-logo-2024.svg" alt="Adobe"></div>
+                <div class="marquee-logo"><img src="https://www.uicto.edu.ng/assets/images/logo-main.png" alt="UNICTO"></div>
+                <div class="marquee-logo"><img src="https://shorturl.at/f6KTc" alt="EBSU"></div>
+                <div class="marquee-logo"><img src="https://tinyurl.com/4w8xuvwx" alt="IBM"></div>
+                <div class="marquee-logo"><img src="https://tinyurl.com/34waph86" alt="Oracle"></div>
+                <div class="marquee-logo"><img src="https://www.vectorlogo.zone/logos/cisco/cisco-icon.svg" alt="Cisco"></div>
+                <div class="marquee-logo"><img src="https://www.vectorlogo.zone/logos/dell/dell-icon.svg" alt="Dell"></div>
+                <div class="marquee-logo"><img src="https://www.vectorlogo.zone/logos/hp/hp-icon.svg" alt="HP"></div>
+                <div class="marquee-logo"><img src="https://tinyurl.com/mt6punee" alt="Amazon"></div>
+
+                <!-- Set 2 (duplicate for seamless loop) -->
+                <div class="marquee-logo"><img src="https://www.vectorlogo.zone/logos/google/google-icon.svg" alt="Google"></div>
+                <div class="marquee-logo"><img src="https://uhf.microsoft.com/images/microsoft/RE1Mu3b.png" alt="Microsoft"></div>
+                <div class="marquee-logo"><img src="https://www.adobe.com/cc-shared/assets/img/product-icons/svg/adobe-corp-logo-2024.svg" alt="Adobe"></div>
+                <div class="marquee-logo"><img src="https://www.uicto.edu.ng/assets/images/logo-main.png" alt="UNICTO"></div>
+                <div class="marquee-logo"><img src="https://shorturl.at/f6KTc" alt="EBSU"></div>
+                <div class="marquee-logo"><img src="https://tinyurl.com/4w8xuvwx" alt="IBM"></div>
+                <div class="marquee-logo"><img src="https://tinyurl.com/34waph86" alt="Oracle"></div>
+                <div class="marquee-logo"><img src="https://www.vectorlogo.zone/logos/cisco/cisco-icon.svg" alt="Cisco"></div>
+                <div class="marquee-logo"><img src="https://www.vectorlogo.zone/logos/dell/dell-icon.svg" alt="Dell"></div>
+                <div class="marquee-logo"><img src="https://www.vectorlogo.zone/logos/hp/hp-icon.svg" alt="HP"></div>
+                <div class="marquee-logo"><img src="https://tinyurl.com/mt6punee" alt="Amazon"></div>    
+            </div>
+        </div>
+    </div>
+    <!-- Trusted By / Tech Marquee End -->
 
     <!-- About Start -->
     <div class="container-fluid py-3">
@@ -110,12 +231,55 @@
                             </h6>
                         </div>
                     </div>
-                    <div class="d-flex align-items-center mt-4 wow fadeInUp" data-wow-delay="0.3s">
-                        <a class="btn btn-primary rounded-pill px-4 me-3" href="{{ route('about') }}">Read More</a>
-                        <a class="btn btn-outline-primary btn-square me-3" href=""><i class="fab fa-facebook-f"></i></a>
-                        <a class="btn btn-outline-primary btn-square me-3" href=""><i class="fab fa-twitter"></i></a>
-                        <a class="btn btn-outline-primary btn-square me-3" href=""><i class="fab fa-instagram"></i></a>
-                        <a class="btn btn-outline-primary btn-square" href=""><i class="fab fa-linkedin-in"></i></a>
+                    @php
+                        $social = $systemInfo->social_links ?? [];
+                    @endphp
+                    <div class="d-flex flex-wrap align-items-center gap-3 mt-4 wow fadeInUp" data-wow-delay="0.3s">
+                        <a class="btn btn-primary rounded-pill px-4 about-link w-60 w-sm-auto order-last order-sm-first" href="{{ route('about') }}">Read More</a>
+
+                        @if(!empty($social['facebook']))
+                            <a class="btn btn-outline-primary btn-square order-1" href="{{ $social['facebook'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['twitter']))
+                            <a class="btn btn-outline-primary btn-square order-2" href="{{ $social['twitter'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['instagram']))
+                            <a class="btn btn-outline-primary btn-square order-3" href="{{ $social['instagram'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['tiktok']))
+                            <a class="btn btn-outline-primary btn-square d-inline-flex align-items-center justify-content-center order-4" href="{{ $social['tiktok'] }}" target="_blank" rel="noopener">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 448 512" style="margin-bottom: 2px;">
+                                    <path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a72.59,72.59,0,1,0,50.23,69.63V0h90.08a101.58,101.58,0,0,0,10.6,43.43,103.54,103.54,0,0,0,76.54,58.46V209.91Z"/>
+                                </svg>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['linkedin']))
+                            <a class="btn btn-outline-primary btn-square order-5" href="{{ $social['linkedin'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['youtube']))
+                            <a class="btn btn-outline-primary btn-square order-6" href="{{ $social['youtube'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        @endif
+
+                        @if(!empty($social['whatsapp']))
+                            <a class="btn btn-outline-primary btn-square order-7" href="{{ $social['whatsapp'] }}" target="_blank" rel="noopener">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -123,7 +287,7 @@
     </div>
     <!-- About End -->
   
-    <!-- Service Start -->
+    <!-- Programs Start -->
     <section class="curriculum-section py-3 wow flipInX" data-wow-delay="0.2s">
         <div class="container py-4">
             <div class="news-header-eyebrow">
@@ -213,24 +377,26 @@
             </div>
         </div>
     </section>
-    <!-- Service End -->
+    <!-- Programs End -->
 
     <!-- Our Services Start -->
     <div class="container-fluid bg-light py-3">
         <div class="container py-5">
-            <div class="row g-5 align-items-center">
-                <div class="col-lg-5 wow slideInLeft" data-wow-delay="0.1s">
-                    <div class="news-header-eyebrow">
+            <div class="row g-5">
+                <div class="col-lg-5">
+                    <div class="news-header-eyebrow wow slideInLeft" data-wow-delay="0.1s">
                         <span class="font-mono">[03]</span>
                         <div class="tech-line w-12"></div>
                         <span class="font-mono uppercase">Our Services</span>
                     </div>
-                    <h3 class="mb-4">Professional ICT Training & Technology Solutions</h3>
-                    <p class="mb-4">
+                    <h3 class="mb-4 wow slideInLeft" data-wow-delay="0.1s">Professional ICT Training & Technology Solutions</h3>
+                    <p class="mb-4 wow slideInLeft" data-wow-delay="0.1s">
                         Teqhitch ICT Academy LTD is a dynamic technology company focused on ICT training, project execution, and academic support. 
                         We provide hands-on learning experiences, deliver real-world digital projects, and develop well-structured seminar and project reports. 
-                        Our goal is to equip students and organizations with practical skills and reliable technology solutions for today’s digital world.
+                        Our goal is to equip students and organizations with practical skills and reliable technology solutions for today's digital world.
                     </p>
+                    <img src="{{ asset( asset('assets/img/services-image.png')) }}" alt="services-image" width="100%" class="wow slideInLeft" data-wow-delay="0.1s">
+                    
                 </div>
                 <div class="col-lg-7">
                     <div class="row g-4">
@@ -245,7 +411,7 @@
                                         <p>
                                             Hands-on ICT training designed to equip students with real-world technical and professional skills.
                                         </p>
-                                        <a class="btn px-3 mt-auto mx-auto" href="{{ route('contact') }}">Get Started</a>
+                                        <a class="btn px-3 mt-auto mx-auto" href="{{ route('services') }}">Get Started</a>
                                     </div>
                                 </div>
 
@@ -258,7 +424,7 @@
                                         <p>
                                             Development and execution of ICT projects using modern tools and industry best practices.
                                         </p>
-                                        <a class="btn px-3 mt-auto mx-auto" href="{{ route('contact') }}">Get Started</a>
+                                        <a class="btn px-3 mt-auto mx-auto" href="{{ route('products') }}">Get Started</a>
                                     </div>
                                 </div>
                             </div>
@@ -299,6 +465,63 @@
         </div>
     </div>
     <!-- Our Services End -->
+    
+    <!-- Products Start -->
+    <div class="container-fluid py-3">
+        <div class="container py-3">
+            <div class="news-header-eyebrow wow slideInUp" data-wow-delay="0.1s">
+                <span class="font-mono">[04]</span>
+                <div class="tech-line w-12"></div>
+                <span class="font-mono uppercase">Our Works</span>
+            </div>
+            <div class="curriculum-header">
+                <h3 class="fw-bold">Software We've Built &amp; Sites We've Delivered</h3>
+                <a href="{{ route('services') }}" class="view-all-link">
+                    View all programs
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="row g-4 wow slideInUp" data-wow-delay="0.1s">
+                @forelse($products as $product)
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="news-card h-100">
+                            <div class="news-card-top">
+                                <div class="news-card-icon">
+                                    <i class="{{ $product->type === 'software' ? 'fas fa-laptop-code' : 'fas fa-globe-america' }}"></i>
+                                </div>
+                                <span class="news-tag font-mono">
+                                    {{ strtoupper($product->type) }}
+                                </span>
+                            </div>
+                            <div class="news-card-body">
+                                @if($product->thumbnail)
+                                    <img src="{{ asset('uploads/'.$product->thumbnail) }}"
+                                        class="img-fluid rounded mb-3" alt="{{ $product->title }}">
+                                @endif
+                                <h4 class="news-card-title">{{ $product->title }}</h4>
+                                <p class="news-card-excerpt">{{ Str::limit($product->description, 110) }}</p>
+                            </div>
+                            <div class="news-card-footer">
+                                @if($product->link)
+                                    <a href="{{ $product->link }}" target="_blank" class="news-card-link font-mono">
+                                        View Project <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                @else
+                                    <span class="text-muted font-mono small">Private / Internal</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12 text-center py-3">
+                        <p class="text-muted mb-0">No products to showcase yet.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+    <!-- Products End -->
 
     <!-- Why Choose Us Start -->
     <div class="container-fluid feature py-3">
@@ -306,7 +529,7 @@
             <div class="row justify-content-center text-center mb-5 wow fadeIn" data-wow-delay="0.1s">
                 <div class="col-lg-8">
                     <div class="news-header-eyebrow justify-content-center">
-                        <span class="font-mono">[04]</span>
+                        <span class="font-mono">[05]</span>
                         <div class="tech-line w-12"></div>
                         <span class="font-mono uppercase">Why Choose Us</span>
                     </div>
@@ -317,25 +540,25 @@
             </div>
 
             <div class="row g-4 mb-5">
-                <div class="col-sm-6 col-lg-3 wow fadeIn" data-wow-delay="0.2s">
+                <div class="col-sm-6 col-lg-3 wow fadeIn" data-wow-delay="0.1s">
                     <div class="feature-chip">
                         <div class="feature-chip-icon"><i class="fa fa-globe"></i></div>
                         <span class="text-center">Expertise in Diverse Technologies</span>
                     </div>
                 </div>
-                <div class="col-sm-6 col-lg-3 wow fadeIn" data-wow-delay="0.3s">
+                <div class="col-sm-6 col-lg-3 wow fadeIn" data-wow-delay="0.1s">
                     <div class="feature-chip">
                         <div class="feature-chip-icon"><i class="fa fa-lightbulb"></i></div>
                         <span>Innovation-Driven Approach</span>
                     </div>
                 </div>
-                <div class="col-sm-6 col-lg-3 wow fadeIn" data-wow-delay="0.4s">
+                <div class="col-sm-6 col-lg-3 wow fadeIn" data-wow-delay="0.2s">
                     <div class="feature-chip">
                         <div class="feature-chip-icon"><i class="fa fa-globe-africa"></i></div>
                         <span>Global Reach, Local Expertise</span>
                     </div>
                 </div>
-                <div class="col-sm-6 col-lg-3 wow fadeIn" data-wow-delay="0.5s">
+                <div class="col-sm-6 col-lg-3 wow fadeIn" data-wow-delay="0.3s">
                     <div class="feature-chip">
                         <div class="feature-chip-icon"><i class="fa fa-handshake"></i></div>
                         <span>Client-Centric Philosophy</span>
@@ -353,7 +576,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-6 col-lg-4 wow fadeIn" data-wow-delay="0.3s">
+                <div class="col-sm-6 col-lg-4 wow fadeIn" data-wow-delay="0.2s">
                     <div class="feature-stat">
                         <i class="fa fa-sitemap"></i>
                         <div>
@@ -364,7 +587,7 @@
                 </div>
             </div>
 
-            <div class="text-center mt-5 wow fadeIn" data-wow-delay="0.4s">
+            <div class="text-center mt-5 wow fadeIn" data-wow-delay="0.3s">
                 <a class="btn btn-primary rounded-pill px-4" href="{{ route('services') }}">Get Started</a>
             </div>
 
@@ -375,10 +598,10 @@
     <!-- Team Start -->
     <div class="container-fluid bg-light py-3">
         <div class="container py-5">
-            <div class="row g-5 align-items-center">
+            <div class="row g-5">
                 <div class="col-lg-5 order-md-2 wow fadeIn" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeIn;">
                     <div class="news-header-eyebrow">
-                        <span class="font-mono">[05]</span>
+                        <span class="font-mono">[06]</span>
                         <div class="tech-line w-12"></div>
                         <span class="font-mono uppercase">Our Team</span>
                     </div>
@@ -387,20 +610,23 @@
                         Our team consists of skilled ICT professionals, instructors, and project experts with strong industry and academic experience. 
                         They are committed to delivering quality training, executing reliable technology projects, and providing expert guidance to students and organizations.
                     </p>
-                    <a class="btn btn-primary rounded-pill px-4" href="{{ route('about') }}">Read more</a>
                 </div>
                 <div class="col-lg-7 order-md-1">
                     <div class="row g-4">
                         <div class="col-md-6">
                             <div class="row g-4">
-                                @foreach($team->take(2) as $index => $member)
+                                @forelse($team->take(2) as $index => $member)
                                 <div class="col-12 wow fadeIn" data-wow-delay="{{ ($index + 1) * 0.1 }}s">
                                     <div class="team-item bg-white text-center rounded p-4 pt-0">
                                         <img class="img-fluid rounded-circle p-4" 
                                             src="{{ $member->image ? asset('uploads/'.$member->image) : asset('assets/img/user/icon-male.png') }}" 
-                                            alt="">
-                                        <h5 class="mb-0">{{ $member->fullname }}</h5>
+                                            alt="" width="130px">
+                                        <h6 class="mb-0">{{ $member->fullname }}</h6>
                                         <small>{{ $member->position }}</small>
+
+                                        @if($member->bio)
+                                            <p class="text-muted small mt-2 mb-0">{{ Str::limit($member->bio, 100) }}</p>
+                                        @endif
 
                                         <div class="d-flex justify-content-center mt-3">
                                             <a class="btn btn-square btn-primary m-1" href="{{ $member->facebook ?? '#' }}"><i class="fab fa-facebook-f"></i></a>
@@ -410,7 +636,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                @endforeach
+                                @empty
+                                <div class="col-12 text-center">
+                                    <p class="text-muted mb-0">No team members to display at the moment.</p>
+                                </div>
+                                @endforelse
                             </div>
                         </div>
 
@@ -421,9 +651,13 @@
                                     <div class="team-item bg-white text-center rounded p-4 pt-0">
                                         <img class="img-fluid rounded-circle p-4" 
                                             src="{{ $member->image ? asset('uploads/'.$member->image) : asset('assets/img/user/icon-male.png') }}" 
-                                            alt="">
-                                        <h5 class="mb-0">{{ $member->fullname }}</h5>
+                                            alt=""  width="130px">
+                                        <h6 class="mb-0">{{ $member->fullname }}</h6>
                                         <small>{{ $member->position }}</small>
+
+                                        @if($member->bio)
+                                            <p class="text-muted small mt-2 mb-0">{{ Str::limit($member->bio, 100) }}</p>
+                                        @endif
 
                                         <div class="d-flex justify-content-center mt-3">
                                             <a class="btn btn-square btn-primary m-1" href="{{ $member->facebook ?? '#' }}"><i class="fab fa-facebook-f"></i></a>
@@ -442,6 +676,51 @@
         </div>
     </div>
     <!-- Team End -->
+    
+    <!-- Gallery Start -->
+    <div class="container-fluid feature py-3">
+        <div class="container py-5">
+            <div class="mx-auto text-center wow slideInUp" data-wow-delay="0.1s" style="max-width: 600px;">
+                <div class="news-header-eyebrow justify-content-center">
+                    <span class="font-mono">[07]</span>
+                    <div class="tech-line w-12"></div>
+                    <span class="font-mono uppercase">Gallery</span>
+                </div>
+                <h3 class="text-white mb-4">Moments From Our Trainings &amp; Projects</h3>
+            </div>
+
+            <div class="position-relative wow slideInUp" data-wow-delay="0.2s">
+
+                <div class="owl-carousel gallery-carousel">
+
+                    @forelse($gallerys as $item)                        
+                        <div class="gallery-slide">
+                            <a href="{{ asset('uploads/'.$item->image) }}" target="_blank" class="gallery-item d-block rounded overflow-hidden">
+                                <img src="{{ asset('uploads/'.$item->image) }}"
+                                    class="img-fluid w-100" style="aspect-ratio: 4/3; object-fit: cover;"
+                                    alt="{{ $item->title ?? 'Gallery image' }}">
+                            </a>
+                        </div>
+                    @empty
+                        <div class="col-12 text-center py-5">
+                            <p class="text-muted mb-0">No gallery images uploaded yet.</p>
+                        </div>
+                    @endforelse
+
+                </div>
+
+                <!-- Custom Nav Buttons -->
+                <button type="button" class="gallery-nav-btn gallery-prev">
+                    <i class="fa fa-chevron-left"></i>
+                </button>
+                <button type="button" class="gallery-nav-btn gallery-next">
+                    <i class="fa fa-chevron-right"></i>
+                </button>
+
+            </div>
+        </div>
+    </div>
+    <!-- Gallery End -->
 
     <!-- Testimonial Start -->
     <div class="container-xxl py-3">
@@ -449,7 +728,7 @@
             <div class="row g-5">
                 <div class="col-lg-5 wow fadeIn" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeIn;">
                     <div class="news-header-eyebrow">
-                        <span class="font-mono">[06]</span>
+                        <span class="font-mono">[08]</span>
                         <div class="tech-line w-12"></div>
                         <span class="font-mono uppercase">Testimonial</span>
                     </div>
@@ -463,13 +742,13 @@
                 <div class="col-lg-7 wow fadeIn" data-wow-delay="0.5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeIn;">
                     <div class="owl-carousel testimonial-carousel border-start border-global owl-loaded owl-drag">
                         
-                        @foreach($testimonies as $testimony)
+                        @forelse($testimonies as $testimony)
                         <div class="testimonial-item ps-5">
                             <i class="fa fa-quote-left text-global mb-3"></i>
                             <p>{{ $testimony->message }}</p>
                             <div class="d-flex align-items-center">
                                 <img class="img-fluid rounded-circle"
-                                    src="{{ $testimony->image ? asset('uploads/' . $testimony->image) : 'https://dummyimage.com/90x90/f0f0f0/000&text=User' }}"
+                                    src="{{ $testimony->image ? asset('uploads/' . $testimony->image) : asset('assets/img/user/icon-male.png') }}"
                                     style="width:50px;height:50px;">
                                 <div class="ps-3">
                                     <h5 class="mb-1">{{ $testimony->name }}</h5>
@@ -477,7 +756,11 @@
                                 </div>
                             </div>
                         </div>
-                        @endforeach
+                        @empty
+                        <div class="testimonial-item ps-5 py-0">
+                            <p class="text-muted mb-0">No testimonials yet.</p>
+                        </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -488,13 +771,13 @@
     <!-- News Start -->
     <section class="news-section py-3">
         <div class="container py-4">
-            <div class="news-header-eyebrow wow fadeIn" data-wow-delay="0.1s">
-                <span class="font-mono">[07]</span>
+            <div class="news-header-eyebrow wow slideInUp" data-wow-delay="0.1s">
+                <span class="font-mono">[09]</span>
                 <div class="tech-line w-12"></div>
                 <span class="font-mono uppercase">Latest Updates</span>
             </div>
 
-            <div class="curriculum-header wow fadeIn" data-wow-delay="0.1s">
+            <div class="curriculum-header wow slideInUp" data-wow-delay="0.1s">
                 <h3 class="fw-bold">Latest News &amp; Insights</h3>
                 <a href="{{ route('news') }}" class="view-all-link">
                     View all news
@@ -528,7 +811,7 @@
                         </a>
                     </div>
                 @empty
-                    <div class="col-12 text-center py-5">
+                    <div class="col-12 text-center py-3">
                         <p class="text-muted mb-0">No news posted yet.</p>
                     </div>
                 @endforelse
@@ -543,7 +826,7 @@
         <div class="container py-3">
             <div class="mx-auto text-center wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px; visibility: visible; animation-delay: 0.1s; animation-name: fadeIn;">
                 <div class="news-header-eyebrow justify-content-center">
-                    <span class="font-mono">[08]</span>
+                    <span class="font-mono">[10]</span>
                     <div class="tech-line w-12"></div>
                     <span class="font-mono uppercase">Popular FAQs</span>
                 </div>
@@ -704,6 +987,30 @@
                         panel.style.height = panel.scrollHeight + 'px';
                     }
                 });
+            });
+            
+            var $galleryCarousel = $('.gallery-carousel').owlCarousel({
+                loop: true,
+                margin: 20,
+                nav: false,
+                dots: true,
+                autoplay: true,
+                autoplayTimeout: 3000,
+                autoplayHoverPause: true,
+                responsive: {
+                    0: { items: 1 },
+                    576: { items: 2 },
+                    992: { items: 3 },
+                    1200: { items: 4 }
+                }
+            });
+
+            $('.gallery-prev').on('click', function () {
+                $galleryCarousel.trigger('prev.owl.carousel');
+            });
+
+            $('.gallery-next').on('click', function () {
+                $galleryCarousel.trigger('next.owl.carousel');
             });
         });
     </script>

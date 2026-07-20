@@ -29,6 +29,8 @@ use App\Http\Controllers\Admin\NewslettersController;
 use App\Http\Controllers\Admin\TestimonyController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\EnrollmentApplicationController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\GalleryController;
 
 // staff
 use App\Http\Controllers\Staff\StaffDashboardController;
@@ -56,6 +58,7 @@ Route::controller(\App\Http\Controllers\View\ViewController::class)->group(funct
     Route::get('/contact', 'contact')->name('contact');
     Route::get('/courses', 'services')->name('services');
     Route::get('/news', 'news')->name('news');
+    Route::get('/products', 'products')->name('products');
     Route::get('/news/{news}', 'newsdetail')->name('news.detail');
     Route::get('/enroll', 'enroll')->name('enroll');
     Route::post('/enroll/store', 'storeEnroll')->name('enroll.store');
@@ -164,10 +167,8 @@ Route::prefix('admin')
             Route::patch('/', [SystemSettingController::class, 'updateinfo'])->name('update');
             Route::patch('branding', [SystemSettingController::class, 'updateBranding'])->name('branding');
             Route::patch('about', [SystemSettingController::class, 'updateAbout'])->name('about');
+            Route::patch('social-links', [SystemSettingController::class, 'updateSocialLinks'])->name('social.links');
         });
-
-        Route::patch('email-settings', [SystemSettingController::class, 'updatemail'])
-            ->name('email.settings.update');
 
         // Suspensions
         Route::patch('admins/{admin}/suspend', [AdminController::class, 'suspend'])->name('admins.suspend');
@@ -222,7 +223,13 @@ Route::prefix('admin')
 
         Route::patch('testimonies/{testimony}/toggle-status', [TestimonyController::class, 'toggleStatus'])
             ->name('testimonies.toggle');
-            
+
+        Route::patch('product/{id}/toggle-status', [ProductController::class, 'toggleStatus'])
+            ->name('product.toggle-status');
+
+        Route::patch('gallery/{id}/toggle-status', [GalleryController::class, 'toggleStatus'])
+            ->name('gallery.toggle-status');
+        
         // Resources
         Route::resources([
             'admins' => AdminController::class,
@@ -237,7 +244,9 @@ Route::prefix('admin')
             'newsletter' => NewslettersController::class,
             'testimony' => TestimonyController::class,
             'team' => TeamController::class,
-            'enrollments' => EnrollmentApplicationController::class
+            'enrollments' => EnrollmentApplicationController::class,
+            'product' => ProductController::class,
+            'gallery' => GalleryController::class,
         ]);
 
         Route::get('enrollments-export', [EnrollmentApplicationController::class, 'exportAll'])

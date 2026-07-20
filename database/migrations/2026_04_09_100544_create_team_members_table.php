@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('team_members', function (Blueprint $table) {
             $table->id();
             $table->string('fullname');
+            $table->text('bio')->nullable();
             $table->string('position');
             $table->string('image')->nullable();
-
             $table->string('facebook')->nullable();
             $table->string('twitter')->nullable();
             $table->string('instagram')->nullable();

@@ -182,6 +182,12 @@
                 <input type="text" name="fullname" class="form-control" value="{{ $teamMember->fullname }}">
             </div>
 
+            <!-- Bio -->
+            <div class="mb-3">
+                <label class="form-label" for="bio">Bio</label>
+                <textarea name="bio" id="bio" class="form-control" rows="4">{{ $teamMember->bio }}</textarea>
+            </div>
+
             <!-- Position -->
             <div class="mb-3">
                 <label class="form-label">Position</label>

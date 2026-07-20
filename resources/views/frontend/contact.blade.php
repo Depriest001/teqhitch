@@ -29,7 +29,7 @@
                         <i class="bi bi-geo-alt flex-shrink-0 h6"></i>
                         <div>
                             <h6>Address</h6>
-                            <p>Equity Lodge Ishieke Market, Ebonyi state, Nigeria.</p>
+                            <p>{{ $systemInfo->address ?? 'Equity Lodge Ishieke Market, Ebonyi state, Nigeria.' }}</p>
                         </div>
                     </div><!-- End Info Item -->
 
@@ -37,7 +37,7 @@
                         <i class="bi bi-telephone flex-shrink-0 h6"></i>
                         <div>
                             <h6>Call Us</h6>
-                            <p><a href="tel:+234 816 658 2751">+234 816 658 2751</a></p>
+                            <p><a href="tel:{{ $systemInfo->support_phone ?? '+2348166582751' }}">{{ $systemInfo->support_phone ?? '+234 816 658 2751' }}</a></p>
                         </div>
                     </div><!-- End Info Item -->
 
@@ -45,9 +45,68 @@
                         <i class="bi bi-envelope flex-shrink-0 h6 me-1"></i>
                         <div>
                             <h6>Email Us</h6>
-                            <p><a href="mailto:support@teqhitch.com">support@teqhitch.com</a></p>
+                            <p><a href="mailto:{{ $systemInfo->support_email ?? 'support@teqhitch.com' }}">{{ $systemInfo->support_email ?? 'support@teqhitch.com' }}</a></p>
                         </div>
                     </div><!-- End Info Item -->
+
+                    @php
+                        $social = $systemInfo->social_links ?? [];
+                    @endphp
+                    @if(array_filter($social))
+                        <div class="d-flex">
+                            <span class="info-item">
+                                <i class="bi bi-share flex-shrink-0 h6"></i>
+                            </span>
+                            <div class="w-100 mb-4">
+                                <h6>Follow Us</h6>
+                                <div class="d-flex flex-wrap gap-2 mt-2">
+                                    @if(!empty($social['facebook']))
+                                        <a class="btn btn-outline-primary btn-square" href="{{ $social['facebook'] }}" target="_blank" rel="noopener">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </a>
+                                    @endif
+
+                                    @if(!empty($social['twitter']))
+                                        <a class="btn btn-outline-primary btn-square" href="{{ $social['twitter'] }}" target="_blank" rel="noopener">
+                                            <i class="fab fa-twitter"></i>
+                                        </a>
+                                    @endif
+
+                                    @if(!empty($social['instagram']))
+                                        <a class="btn btn-outline-primary btn-square" href="{{ $social['instagram'] }}" target="_blank" rel="noopener">
+                                            <i class="fab fa-instagram"></i>
+                                        </a>
+                                    @endif
+
+                                    @if(!empty($social['linkedin']))
+                                        <a class="btn btn-outline-primary btn-square" href="{{ $social['linkedin'] }}" target="_blank" rel="noopener">
+                                            <i class="fab fa-linkedin-in"></i>
+                                        </a>
+                                    @endif
+
+                                    @if(!empty($social['youtube']))
+                                        <a class="btn btn-outline-primary btn-square" href="{{ $social['youtube'] }}" target="_blank" rel="noopener">
+                                            <i class="fab fa-youtube"></i>
+                                        </a>
+                                    @endif
+
+                                    @if(!empty($social['tiktok']))
+                                        <a class="btn btn-outline-primary btn-square d-inline-flex align-items-center justify-content-center" href="{{ $social['tiktok'] }}" target="_blank" rel="noopener">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 448 512" style="margin-bottom: 2px;">
+                                                <path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a72.59,72.59,0,1,0,50.23,69.63V0h90.08a101.58,101.58,0,0,0,10.6,43.43,103.54,103.54,0,0,0,76.54,58.46V209.91Z"/>
+                                            </svg>
+                                        </a>
+                                    @endif
+
+                                    @if(!empty($social['whatsapp']))
+                                        <a class="btn btn-outline-primary btn-square" href="{{ $social['whatsapp'] }}" target="_blank" rel="noopener">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div><!-- End Info Item -->
+                    @endif
                 </div>
                 <div class="col-lg-7">
                     <div class="mx-auto text-center wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px; visibility: visible; animation-delay: 0.1s; animation-name: fadeIn;">
@@ -56,32 +115,32 @@
                     <div class="wow fadeIn" data-wow-delay="0.3s" style="visibility: visible; animation-delay: 0.3s; animation-name: fadeIn;">
                         <form id="" action="" method="post">
                             <div class="row">
-                                <div class="col-sm-6 mb-2 control-group">
+                                <div class="col-sm-6 mb-3 control-group">
                                     <div class="form-floating">
                                         <input type="text" class="form-control" id="name" placeholder="Your Name" required="required">
                                         <label for="name">Your Name</label>
                                     </div>
                                 </div>
-                                <div class="col-sm-6 mb-2 control-group">
+                                <div class="col-sm-6 mb-3 control-group">
                                     <div class="form-floating">
                                         <input type="email" class="form-control" id="email" placeholder="Your Email" required="required">
                                         <label for="email">Your Email</label>
                                     </div>
                                 </div>
-                                <div class="col-12 mb-2 control-group">
+                                <div class="col-12 mb-3 control-group">
                                     <div class="form-floating">
                                         <input type="text" class="form-control" id="subject" placeholder="Subject" required="required">
                                         <label for="subject">Subject</label>
                                     </div>
                                 </div>
-                                <div class="col-12 mb-2 control-group">
+                                <div class="col-12 mb-3 control-group">
                                     <div class="form-floating">
                                         <textarea style="height: 200px" class="form-control" id="message" placeholder="Message" required="required"></textarea>
                                         <label for="message">Leave a message here</label>
                                     </div>
                                 </div>
-                                <div class="col-12 mb-2">
-                                    <button class="btn btn-sm btn-primary py-3 w-100" type="submit" id="sendMessageButton">
+                                <div class="col-12 mb-3">
+                                    <button class="btn btn-sm btn-primary py-2 w-100" type="submit" id="sendMessageButton">
                                         <span>Send Message</span>
                                         <div class="d-none spinner-border spinner-border-sm text-light ms-3" role="status"></div>
                                     </button>
