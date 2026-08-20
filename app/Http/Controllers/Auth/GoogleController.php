@@ -36,36 +36,22 @@ class GoogleController extends Controller
                     'google_id' => $googleUser->id
                 ]);
             }
-        } else {
-            // Create new user
-            $user = User::create([
-                'name' => $googleUser->name,
-                'email' => $googleUser->email,
-                'google_id' => $googleUser->id,
-                'avatar' => $googleUser->avatar,
-                'role' => 'student', // default
-                'status' => 'active',
-                'password' => Hash::make(uniqid()),
-            ]);
+        } //else {
+        //     // Create new user
+        //     $user = User::create([
+        //         'name' => $googleUser->name,
+        //         'email' => $googleUser->email,
+        //         'google_id' => $googleUser->id,
+        //         'avatar' => $googleUser->avatar,
+        //         'status' => 'active',
+        //         'password' => Hash::make(uniqid()),
+        //     ]);
             
-            event(new Registered($user));
-        }
-
-        // ✅ Ensure student profile exists ONLY if role is student
-        if ($user->role === 'student') {
-            StudentProfile::firstOrCreate(
-                ['user_id' => $user->id], // prevent duplicates
-                [
-                    'address' => null,
-                    'institution' => null,
-                ]
-            );
-        }
+        //     event(new Registered($user));
+        // }
 
         Auth::login($user);
 
-        return $user->role === 'instructor'
-            ? redirect()->route('staff.dashboard')
-            : redirect()->route('user.dashboard');
+        return redirect()->route('student.dashboard');
     }
 }

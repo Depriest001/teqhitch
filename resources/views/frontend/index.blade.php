@@ -441,7 +441,7 @@
                                         <p>
                                             Well-structured seminar papers and academic project reports that meet institutional standards.
                                         </p>
-                                        <a class="btn px-3 mt-auto mx-auto" href="{{ route('contact') }}">Get Started</a>
+                                        <a class="btn px-3 mt-auto mx-auto" href="{{ route('topics.index') }}">Get Started</a>
                                     </div>
                                 </div>
 

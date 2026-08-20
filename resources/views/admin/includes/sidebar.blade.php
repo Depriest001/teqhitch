@@ -72,6 +72,13 @@
                 </a>
             </li>
 
+            <li class="menu-item {{ request()->routeIs('admin.siwes.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.siwes.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-briefcase-alt-2"></i>
+                    <div class="text-truncate"> Manage SIWES Application</div>
+                </a>
+            </li>
+
             @if(in_array($role, ['superadmin','admin']))
             <li class="menu-item {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}">
                 <a href="{{ route('admin.certificates.index') }}" class="menu-link">
@@ -85,13 +92,6 @@
                 <a href="{{ route('admin.topics.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-book"></i>
                     <div class="text-truncate">Manage Topic</div>
-                </a>
-            </li>
-
-            <li class="menu-item {{ request()->routeIs('admin.topic-payments.*') || request()->routeIs('admin.topic-payment-settings.*')? 'active' : '' }}">
-                <a href="{{ route('admin.topic-payments.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-credit-card"></i>
-                    <div class="text-truncate">Topic Payments</div>
                 </a>
             </li>
 

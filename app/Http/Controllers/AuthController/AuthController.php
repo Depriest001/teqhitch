@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Admin;
-use App\Models\StudentProfile;
+use App\Models\Students;
 use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
@@ -49,7 +49,6 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->remember)) {
 
             $request->session()->regenerate();
-
             $user = Auth::user();
 
             if (! $user->hasVerifiedEmail()) {
@@ -60,15 +59,13 @@ class AuthController extends Controller
                 'login',
                 'authentication',
                 [
-                    'role' => $user->role,
+                    'role' => 'User',
                     'status' => 'success',
                     'description' => 'User Logged in successfully'
                 ]
             );
 
-            return $user->role === 'instructor'
-            ? redirect()->route('staff.dashboard')
-            : redirect()->route('user.dashboard');
+            return redirect()->route('student.dashboard');
         }
 
         return back()->withErrors([
@@ -100,47 +97,37 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed', // confirms with password_confirmation
-            'phone' => 'nullable|string|max:20',
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:255',
+            'email'     => ['required', 'email', 'max:150', Rule::unique('students', 'email')],
+            'phone'     => ['required', 'string', 'max:20', Rule::unique('students', 'phone')],
+            'password'  => ['required', 'string', 'min:8', 'confirmed'], // confirms with password_confirmation
         ]);
 
-        DB::transaction(function () use ($request) {
-
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'phone' => $request->phone,
-                'role' => 'student',                     // default role
-                'status' => 'active',                    // default status
+        $student = DB::transaction(function () use ($validated) {
+            return Student::create([
+                'student_id' => Student::nextStudentId(),
+                'full_name'  => $validated['full_name'],
+                'email'      => $validated['email'],
+                'phone'      => $validated['phone'],
+                'password'   => Hash::make($validated['password']),
+                'study_mode' => 'onsite', // swap for a form field if registrants choose onsite/online themselves
+                'status'     => 'active',
+                'source'     => 'manual',
             ]);
-            // Create Instructor Profile
-            StudentProfile::create([
-                'user_id' => $user->id,
-            ]);
-
-            $user->sendEmailVerificationNotification();
-
-            // Optional: login the user after registration
-            Auth::login($user);
-            activity_log(
-                'register',
-                'authentication',
-                [
-                    'email' => $user->email,
-                    'status' => 'success',
-                    'description' => 'User registered successfully'
-                ]
-            );
-            return redirect()->route('verification.notice');
         });
 
+        $student->sendEmailVerificationNotification();
 
-        return redirect()->route('user.dashboard')->with('success', 'Registration successful!');
-    
+        Auth::guard('student')->login($student);
+
+        activity_log('register', 'authentication', [
+            'email'       => $student->email,
+            'status'      => 'success',
+            'description' => 'Student registered successfully',
+        ]);
+
+        return redirect()->route('verification.notice');
     }
 
 

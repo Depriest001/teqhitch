@@ -47,5 +47,12 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URL'),
     ],
+    
+    'strowallet' => [
+        'public_key' => env('STROWALLET_PUBLIC_KEY'),
+        'API_mode' => env('STROWALLET_MODE'),
+        'bank' => env('STROWALLET_BANK'),
+        'webhook_url' => env('STROWALLET_WEBHOOK_URL')
+    ],
 
 ];

@@ -9,6 +9,8 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\AuthController\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Middleware\CheckInstructor;
+use App\Http\Controllers\View\ViewTopicController;
+use App\Http\Controllers\View\SiwesApplicationController;
 
 // admin
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -23,7 +25,6 @@ use App\Http\Controllers\Admin\AdminAnnouncementController;
 use App\Http\Controllers\Admin\SystemSettingController;
 use App\Http\Controllers\Admin\TopicController; 
 use App\Http\Controllers\Admin\PapersController;
-use App\Http\Controllers\Admin\TopicPaymentController;
 use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\NewslettersController;
 use App\Http\Controllers\Admin\TestimonyController;
@@ -31,6 +32,8 @@ use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\EnrollmentApplicationController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\GalleryController;
+use App\Http\Controllers\Admin\AdminSiwesApplicationController;
+use App\Http\Controllers\Admin\SiwesTrackController;
 
 // staff
 use App\Http\Controllers\Staff\StaffDashboardController;
@@ -40,14 +43,7 @@ use App\Http\Controllers\Staff\StaffAssignmentController;
 use App\Http\Controllers\Staff\StaffAnnouncementController;
 
 // student
-use App\Http\Controllers\User\UserDashboardController;
-use App\Http\Controllers\User\CourseController;
-use App\Http\Controllers\User\AssignmentController;
-use App\Http\Controllers\User\CertificateController;
-use App\Http\Controllers\User\AnnouncementController;
-use App\Http\Controllers\User\ModuleProgressController;
-use App\Http\Controllers\User\SearchTopicController;
-
+use App\Http\Controllers\Student\StudentController;
 
 // ----------------------
 // Public Pages
@@ -63,6 +59,28 @@ Route::controller(\App\Http\Controllers\View\ViewController::class)->group(funct
     Route::get('/enroll', 'enroll')->name('enroll');
     Route::post('/enroll/store', 'storeEnroll')->name('enroll.store');
 });
+
+/*
+|--------------------------------------------------------------------------
+| SIWES / IT Placement — Teqhitch ICT Academy
+|--------------------------------------------------------------------------
+| Merge these routes into your existing routes/web.php
+*/
+
+Route::prefix('siwes')->name('siwes.')->group(function () {
+    Route::get('/apply', [SiwesApplicationController::class, 'create'])->name('apply');
+    Route::post('/apply', [SiwesApplicationController::class, 'store'])->name('store');
+    Route::get('/payment/{application:reference}', [SiwesApplicationController::class, 'payment'])->name('payment');
+    Route::get('/payment/{application:reference}/status', [SiwesApplicationController::class, 'status'])->name('payment.status');
+    Route::get('/payment/{application:reference}/success', [SiwesApplicationController::class, 'success'])->name('payment.success');
+});
+
+
+// Strowallet posts here — must stay outside CSRF protection (see notes below).
+Route::post('/webhooks/strowallet', [SiwesApplicationController::class, 'webhook'])->name('siwes.webhook');
+
+Route::get('/topics', [ViewTopicController::class, 'index'])->name('topics.index');
+Route::get('/topics/filter', [ViewTopicController::class, 'filter'])->name('topics.filter');
 
 // subscriber
 Route::post('/subscribe', [SubscriberController::class, 'store'])->name('subscriber.store');
@@ -192,23 +210,6 @@ Route::prefix('admin')
             Route::get('download-software/{id}', [PapersController::class, 'downloadSoftware'])->name('downloadSoftware');
         });
 
-        // Topic Payments
-        Route::get('topic-payments', [TopicPaymentController::class, 'index'])->name('topic-payments.index');
-        Route::get('topic-payments/{id}', [TopicPaymentController::class, 'show'])->name('topic-payments.show');
-        Route::post('topic-payments/{id}/status', [TopicPaymentController::class, 'updateStatus'])
-            ->name('topic-payments.updateStatus');
-
-        // Topic Payment Settings
-        Route::prefix('topic-payment-settings')->name('topic-payment-settings.')->group(function () {
-            Route::get('/', [TopicPaymentController::class, 'settingsIndex'])->name('index');
-            Route::post('/', [TopicPaymentController::class, 'settingsStore'])->name('store');
-            Route::put('{setting}', [TopicPaymentController::class, 'settingsUpdate'])->name('update');
-            Route::delete('{setting}', [TopicPaymentController::class, 'destroy'])->name('destroy');
-        });
-
-        Route::delete('topic-payment/{id}', [TopicPaymentController::class, 'paymentDestroy'])
-            ->name('topic-payment.destroy');
-
         Route::get('certificates/generate-code', [AdminCertificateController::class, 'generateCode'])
             ->name('certificates.generate_code');
 
@@ -229,6 +230,13 @@ Route::prefix('admin')
 
         Route::patch('gallery/{id}/toggle-status', [GalleryController::class, 'toggleStatus'])
             ->name('gallery.toggle-status');
+
+        Route::prefix('siwes')->name('siwes.')->group(function () {
+            Route::resource('tracks', SiwesTrackController::class)->except(['show']);
+            
+            Route::get('/', [AdminSiwesApplicationController::class, 'index'])->name('index');
+            Route::get('/{application:reference}', [AdminSiwesApplicationController::class, 'show'])->name('show');
+        });
         
         // Resources
         Route::resources([
@@ -312,82 +320,10 @@ Route::prefix('staff')
 // =====================
 // USER ROUTES
 // =====================
-Route::prefix('user')
-    ->name('user.')
+Route::prefix('student')
+    ->name('student.')
     ->middleware(['auth', 'verified'])
     ->group(function () {
-
-        Route::get('/', [UserDashboardController::class, 'index'])->name('dashboard');
-
-        Route::get('enroll', [CourseController::class, 'view'])->name('courses.enroll');
-
-        Route::get('activities', [UserDashboardController::class, 'activities'])->name('activities');
-        Route::get('certificates', [UserDashboardController::class, 'certificate'])->name('certificates');
-
-        // Profile
-        Route::prefix('profile')->group(function () {
-            Route::get('/', [UserDashboardController::class, 'profile'])->name('profile');
-            Route::patch('/', [UserDashboardController::class, 'update'])->name('profile.update');
-            Route::put('password', [UserDashboardController::class, 'changePassword'])->name('password.update');
-        });
-
-        // Course Purchase
-        Route::get('student/course/{course}/buy', [CourseController::class, 'buyCourse'])
-            ->name('student.course.buy');
-
-        Route::get('course/{course}/buy', [CourseController::class, 'buyCourse'])
-            ->name('course.buy');
-
-        Route::post('/course/{course}/initialize', [CourseController::class, 'initialize'])
-            ->name('course.initialize');
-
-        Route::get('course/{course}/callback', [CourseController::class, 'callback'])
-            ->name('course.callback');
-
-        Route::post('course/payment-webhook', [CourseController::class, 'paymentWebhook'])
-            ->name('course.webhook');
-
-        Route::post('module/{module}/complete',
-            [ModuleProgressController::class, 'complete'])
-            ->name('module.complete');
-        
-        Route::post('user/enrollment/{enrollment}/complete', [CourseController::class, 'completeCourse'])
-            ->name('courses.complete');
-
-        // Announcements
-        Route::get('announcements', [AnnouncementController::class, 'index'])
-            ->name('announcement.index');
-
-        Route::post('announcements/{announcement}/read',
-            [AnnouncementController::class, 'markAsRead'])
-            ->name('announcement.read');
-
-        Route::get('assignment/grade', [AssignmentController::class, 'grade'])
-            ->name('assignment.grade');
-
-        Route::get('user/certificate/{certificate}/download', [CertificateController::class, 'download'])
-            ->name('certificate.download');
-
-        Route::resource('courses', CourseController::class);
-        Route::resource('assignment', AssignmentController::class);
-        Route::resource('certificate', CertificateController::class);
-
-        // Topics
-        Route::prefix('topics')->name('searchTopics.')->group(function () {
-            Route::get('/', [SearchTopicController::class, 'index'])->name('index');
-            Route::get('generate', [SearchTopicController::class, 'create'])->name('create');
-            Route::post('generate', [SearchTopicController::class, 'generate'])->name('generate');
-            Route::post('use-multiple', [SearchTopicController::class, 'useTopic'])->name('useMultiple');
-            Route::post('approve', [SearchTopicController::class, 'submitTopic'])->name('approve');
-            Route::get('{id}', [SearchTopicController::class, 'show'])->name('show');
-        });
-
-        // Topic Payment
-        Route::prefix('payment')->name('payment.')->group(function () {
-            Route::get('failed', [CourseController::class, 'failed'])->name('failed');
-            Route::get('processing', fn() => view('user.searchTopics.processing'))->name('processing');
-            Route::post('{slug}/initialize', [SearchTopicController::class, 'initialize'])->name('initialize');
-            Route::get('{slug}/{user_topic_id?}', [SearchTopicController::class, 'topicShow'])->name('show');
-            Route::get('check', [SearchTopicController::class, 'check'])->name('check');
-        });
+    
+    Route::get('/', [StudentController::class, 'index'])->name('dashboard');
 });

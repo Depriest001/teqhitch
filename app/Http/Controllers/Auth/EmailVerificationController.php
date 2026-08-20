@@ -65,6 +65,6 @@ class EmailVerificationController extends Controller
     {
         return $user->role === 'staff'
             ? redirect()->route('staff.dashboard')
-            : redirect()->route('user.dashboard');
+            : redirect()->route('student.dashboard');
     }
 }

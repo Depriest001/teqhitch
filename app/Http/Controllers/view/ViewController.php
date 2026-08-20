@@ -11,8 +11,11 @@ use App\Models\News;
 use App\Models\EnrollmentApplication;
 use App\Models\Product;
 use App\Models\Gallery;
+use App\Models\Students;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
+use Throwable;
 
 class ViewController extends Controller
 {
@@ -167,7 +170,20 @@ class ViewController extends Controller
         ]);
 
         // If safe, save the record
-        EnrollmentApplication::create($validated);
+        $enrollment = EnrollmentApplication::create($validated);
+
+        try {
+            $student = Students::createFromEnrollment($enrollment);
+
+            if ($student->wasRecentlyCreated) {
+                $student->sendEmailVerificationNotification();
+            }
+        } catch (Throwable $e) {
+            Log::error('Student account creation failed after enrollment submission', [
+                'enrollment_id' => $enrollment->id,
+                'message'       => $e->getMessage(),
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Your application has been received successfully!');
     }
