@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Middleware\CheckInstructor;
 use App\Http\Controllers\View\ViewTopicController;
 use App\Http\Controllers\View\SiwesApplicationController;
+use App\Http\Controllers\Auth\SiwesOtpController;
 
 // admin
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -44,6 +45,8 @@ use App\Http\Controllers\Staff\StaffAnnouncementController;
 
 // student
 use App\Http\Controllers\Student\StudentController;
+use App\Http\Controllers\Student\StudentPaymentController;
+use App\Http\Controllers\Student\StudentProgramController;
 
 // ----------------------
 // Public Pages
@@ -68,16 +71,22 @@ Route::controller(\App\Http\Controllers\View\ViewController::class)->group(funct
 */
 
 Route::prefix('siwes')->name('siwes.')->group(function () {
-    Route::get('/apply', [SiwesApplicationController::class, 'create'])->name('apply');
+    Route::get('/', [SiwesApplicationController::class, 'index'])->name('index');
+    Route::get('/apply', [SiwesApplicationController::class, 'create'])->name('create');
     Route::post('/apply', [SiwesApplicationController::class, 'store'])->name('store');
     Route::get('/payment/{application:reference}', [SiwesApplicationController::class, 'payment'])->name('payment');
-    Route::get('/payment/{application:reference}/status', [SiwesApplicationController::class, 'status'])->name('payment.status');
     Route::get('/payment/{application:reference}/success', [SiwesApplicationController::class, 'success'])->name('payment.success');
+    Route::get('/payment/{application:reference}/status', [SiwesApplicationController::class, 'status'])->name('payment.status');
+    Route::post('/webhook', [SiwesApplicationController::class, 'webhook'])
+        ->name('webhook')
+        ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+    Route::get('/payment/{application:reference}/regenerate', [SiwesApplicationController::class, 'regenerate'])
+    ->name('payment.regenerate');
+            
+    Route::post('/otp/send',   [SiwesOtpController::class, 'send'])->name('otp.send');
+    Route::post('/otp/verify', [SiwesOtpController::class, 'verify'])->name('otp.verify');
+    // Route::get('/otp/status', [SiwesOtpController::class, 'status'])->name('otp.status');
 });
-
-
-// Strowallet posts here — must stay outside CSRF protection (see notes below).
-Route::post('/webhooks/strowallet', [SiwesApplicationController::class, 'webhook'])->name('siwes.webhook');
 
 Route::get('/topics', [ViewTopicController::class, 'index'])->name('topics.index');
 Route::get('/topics/filter', [ViewTopicController::class, 'filter'])->name('topics.filter');
@@ -318,7 +327,7 @@ Route::prefix('staff')
 });
 
 // =====================
-// USER ROUTES
+// STUDENT ROUTES
 // =====================
 Route::prefix('student')
     ->name('student.')
@@ -326,4 +335,12 @@ Route::prefix('student')
     ->group(function () {
     
     Route::get('/', [StudentController::class, 'index'])->name('dashboard');
+    Route::get('/payments', [StudentPaymentController::class, 'index'])->name('payments.index');
+    Route::get('/programs', [StudentProgramController::class, 'index'])->name('programs.index');
+    Route::get('/certificate', [StudentController::class, 'certificate'])->name('certificate');
+
+    Route::get('/profile', [StudentController::class, 'edit'])->name('profile.settings');
+    Route::put('/profile/settings', [StudentController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [StudentController::class, 'updatePassword'])->name('password.update');
+
 });

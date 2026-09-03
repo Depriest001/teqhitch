@@ -15,26 +15,25 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('student_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
+                ->constrained('students')
+                ->restrictOnDelete();
 
-            $table->foreignId('course_id')
-                ->constrained('courses')
-                ->cascadeOnDelete();
+            // Polymorphic: could be a Course, a SiwesTrack, or anything else later
+            $table->nullableMorphs('payable'); // creates payable_type + payable_id, indexed
 
             $table->decimal('amount', 10, 2);
             $table->string('currency')->default('NGN');
+            $table->string('gateway')->default('strowallet');
 
-            $table->string('reference')->unique(); // transaction reference
-            $table->enum('status', ['pending','success','failed','refunded','deleted'])
+            $table->string('reference')->unique();
+            $table->enum('status', ['pending','success','failed','refunded'])
                 ->default('pending');
 
-            $table->json('meta')->nullable(); // optional extra data
-
+            $table->json('meta')->nullable();
             $table->timestamp('paid_at')->nullable();
             $table->timestamps();
 
-            $table->unique(['student_id','course_id']); // prevents paying twice
+            $table->unique(['student_id', 'payable_type', 'payable_id']);
         });
     }
 

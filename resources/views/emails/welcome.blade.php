@@ -1,25 +1,21 @@
-<x-mail::message>
+@component('mail::message')
+# Welcome, {{ $student->full_name ?? $student->name }}!
 
-<p style="margin-bottom: 10px;">Hello {{ $user->name }},</p>
+Your payment for the SIWES / IT Placement programme has been received, and your student account is ready.
 
-<p style="margin-bottom: 10px;">
-Welcome to <strong>{{ config('app.name') }}</strong>! Your account has been successfully created and verified.
-</p>
+Here are your login details:
 
-<p style="margin-bottom: 10px;">
-You can now log in and start exploring our services, including online courses, seminars, and project writing assistance.
-</p>
+@component('mail::panel')
+**Email:** {{ $student->email }}
+**Temporary password:** {{ $password }}
+@endcomponent
 
-<x-mail::button :url="config('app.url')" :color="'primary'">
-Go to Dashboard
-</x-mail::button>
+@component('mail::button', ['url' => $loginUrl])
+Log in to your dashboard
+@endcomponent
 
-<p style="margin-bottom: 10px;">
-If you have any questions or need assistance, our support team is always ready to help.
-</p>
+For your security, please log in and change this password as soon as possible.
 
-<p style="margin-bottom: 10px;">
-We're excited to have you on board and look forward to supporting your success.
-</p>
-
-</x-mail::message>
+Thanks,<br>
+{{ config('app.name') }}
+@endcomponent

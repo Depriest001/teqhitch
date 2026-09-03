@@ -20,7 +20,7 @@ class Enrollment extends Model
     // Relationship: Enrollment belongs to a student
     public function student()
     {
-        return $this->belongsTo(User::class, 'student_id');
+        return $this->belongsTo(Student::class, 'student_id');
     }
 
     // Relationship: Enrollment belongs to a course

@@ -11,9 +11,11 @@ class Payment extends Model
 
     protected $fillable = [
         'student_id',
-        'course_id',
+        'payable_type',
+        'payable_id',
         'amount',
         'currency',
+        'gateway',
         'reference',
         'status',
         'meta',
@@ -21,19 +23,31 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'meta' => 'array', // cast JSON to array
+        'meta'    => 'array', // cast JSON to array
         'paid_at' => 'datetime',
     ];
 
     // Relationship: Payment belongs to a student
     public function student()
     {
-        return $this->belongsTo(User::class, 'student_id');
+        return $this->belongsTo(Students::class, 'student_id');
     }
 
-    // Relationship: Payment belongs to a course
-    public function course()
+    // Relationship: Payment belongs to whatever it's paying for
+    // (Course, SiwesTrack, etc.)
+    public function payable()
     {
-        return $this->belongsTo(Course::class, 'course_id');
+        return $this->morphTo();
+    }
+
+    // Convenience: filter payments down to a specific payable type
+    public function scopeForCourse($query)
+    {
+        return $query->where('payable_type', Course::class);
+    }
+
+    public function scopeForSiwesTrack($query)
+    {
+        return $query->where('payable_type', SiwesTrack::class);
     }
 }

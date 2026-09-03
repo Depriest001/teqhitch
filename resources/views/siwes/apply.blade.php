@@ -6,6 +6,11 @@
   @php
     $favicon = $globalSetting->favicon ?? null;
     $logo    = $globalSetting->site_logo ?? null;
+    // Server-side source of truth for "is this email already verified".
+    // Passed down from SiwesController@create, e.g.:
+    //   $verifiedEmail = old('email') && SiwesOtpController::isRecentlyVerified(old('email'))
+    //       ? old('email') : null;
+    $verifiedEmail = $verifiedEmail ?? null;
   @endphp
   <link rel="icon" href="{{ $favicon ? asset('storage/'.$favicon) : asset('assets/img/favicon.jpg') }}">
   <title>SIWES / IT Placement Application — {{ $globalSetting->site_name ?? 'Teqhitch' }}</title>
@@ -16,20 +21,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root{
-      /* --- Token system, drawn from the Teqhitch mark: a spiral of four overlapping bands, deep blue at the core opening out to leaf green --- */
-      --ink:      #0B2340;   /* deep navy — primary text, dark surfaces */
-      --ink-2:    #123258;   /* secondary navy */
-      --blue:     #1B6FE0;   /* band 1 */
-      --cyan:     #2FC2E8;   /* band 2 */
-      --teal:     #1FB8A6;   /* band 3 */
-      --leaf:     #56C56A;   /* band 4 */
-      --amber:    #E8A33D;   /* single warm note — reserved for the fee/payment moment only */
-      --paper:    #F5F7FB;   /* page background */
-      --surface:  #FFFFFF;   /* card surface */
-      --line:     #E2E7F0;   /* hairlines, borders */
+      --ink:      #0B2340;
+      --ink-2:    #123258;
+      --blue:     #1B6FE0;
+      --cyan:     #2FC2E8;
+      --teal:     #1FB8A6;
+      --leaf:     #56C56A;
+      --amber:    #E8A33D;
+      --paper:    #F5F7FB;
+      --surface:  #FFFFFF;
+      --line:     #E2E7F0;
       --line-2:   #EDF0F6;
-      --muted:    #64738C;   /* secondary text */
+      --muted:    #64738C;
       --danger:   #D2402C;
+      --success:  #1FA968;
     }
     *{ box-sizing:border-box; }
     html{ scroll-behavior:smooth; }
@@ -74,15 +79,10 @@
     .track-card:hover{ border-color:#C7D2E3; }
     .track-card.selected{ border-color:var(--blue); background:rgba(27,111,224,.05); box-shadow:0 0 0 3px rgba(27,111,224,.12); }
 
-    /* --- Signature: orbit progress ring, echoing the four bands of the mark --- */
     .ring-wrap{ position:relative; width:112px; height:112px; flex-shrink:0; }
     .ring-wrap svg{ width:100%; height:100%; transform:rotate(0deg); }
     .ring-track{ stroke:var(--line); }
-    .ring-seg{ stroke:var(--line); }
-    .ring-seg.lit[data-seg="1"]{ stroke:var(--blue); }
-    .ring-seg.lit[data-seg="2"]{ stroke:var(--cyan); }
-    .ring-seg.lit[data-seg="3"]{ stroke:var(--teal); }
-    .ring-seg.lit[data-seg="4"]{ stroke:var(--leaf); }
+    .ring-seg{ stroke:var(--line); fill:none; }
     .ring-badge{
       position:absolute; inset:0; margin:auto; width:64px; height:64px; border-radius:9999px;
       display:flex; align-items:center; justify-content:center; overflow:hidden;
@@ -99,11 +99,41 @@
 
     .brand-bar{ height:4px; background:linear-gradient(90deg,var(--blue),var(--cyan),var(--teal),var(--leaf)); }
 
-    
     .btn-primary{ background:linear-gradient(135deg, #1657FF 0%, #17B4D9 55%, #2BD480 100%); color:#fff; }
     .btn-primary:hover { background: linear-gradient(135deg, #1657FFBF 0%, #17B4D9BF 55%, #2BD480BF 100%); }
+    .btn-primary:disabled{ opacity:.55; cursor:not-allowed; }
     .btn-ghost{ background:var(--ink); color:#fff; }
     .btn-ghost:hover{ background:var(--ink-2); }
+    .btn-link{ background:transparent; color:var(--blue); }
+    .btn-link:disabled{ color:#A8B2C4; cursor:not-allowed; text-decoration:none; }
+    .btn-sm{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:.5rem .9rem; font-size:.78rem; width:auto; max-width:100%; white-space:nowrap;
+    }
+
+    /* Flex-basis:0 + a max-width cap means the 6 boxes always divide up
+       whatever width is actually available (no fixed px width to overflow
+       a narrow phone), while never growing past a comfortable size on
+       larger screens. */
+    .otp-row{ display:flex; gap:.4rem; width:100%; }
+    .otp-box{
+      flex:1 1 0; min-width:0; max-width:2.6rem; height:2.9rem;
+      text-align:center; font-size:1.05rem; font-family:'IBM Plex Mono',monospace;
+      padding:0;
+    }
+
+    .pill-ok{ display:inline-flex; align-items:center; gap:.35rem; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--success); }
+    .pill-pending{ display:inline-flex; align-items:center; gap:.35rem; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--muted); }
+
+    .restore-toast{
+      position:fixed; left:0; right:0; bottom:1rem; display:flex; justify-content:center; z-index:50;
+      pointer-events:none;
+    }
+    .restore-toast-inner{
+      pointer-events:auto; background:var(--ink); color:#fff; font-size:.82rem; padding:.65rem 1rem;
+      border-radius:.8rem; box-shadow:0 8px 24px rgba(11,35,64,.25); display:flex; align-items:center; gap:.75rem;
+    }
+    .restore-toast-inner button{ width:auto; background:transparent; border:none; color:#BFD2FF; font-family:'IBM Plex Mono',monospace; font-size:.75rem; text-decoration:underline; padding:0; cursor:pointer; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -112,7 +142,6 @@
 
 <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
 
-  <!-- Header -->
   <header class="flex items-start justify-between gap-6 mb-8 sm:mb-10">
     <div class="flex items-center gap-3 min-w-0">
       <img src="{{$logo ? asset('uploads/'.$logo) : asset('assets/img/logo.png') }}" alt="Teqhitch ICT Academy" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full shrink-0" style="box-shadow:0 1px 2px rgba(11,35,64,.10)">
@@ -122,14 +151,9 @@
       </div>
     </div>
 
-    <!-- Orbit progress ring -->
     <div class="ring-wrap hidden sm:block" aria-hidden="true">
-      <svg viewBox="0 0 120 120">
+      <svg viewBox="0 0 120 120" id="ringSvg">
         <circle class="ring-track" cx="60" cy="60" r="50" fill="none" stroke-width="8"/>
-        <circle class="ring-seg" data-seg="1" cx="60" cy="60" r="50" fill="none" stroke-width="8" stroke-linecap="butt" stroke-dasharray="78.54 235.62" transform="rotate(-90 60 60)"/>
-        <circle class="ring-seg" data-seg="2" cx="60" cy="60" r="50" fill="none" stroke-width="8" stroke-linecap="butt" stroke-dasharray="78.54 235.62" transform="rotate(0 60 60)"/>
-        <circle class="ring-seg" data-seg="3" cx="60" cy="60" r="50" fill="none" stroke-width="8" stroke-linecap="butt" stroke-dasharray="78.54 235.62" transform="rotate(90 60 60)"/>
-        <circle class="ring-seg" data-seg="4" cx="60" cy="60" r="50" fill="none" stroke-width="8" stroke-linecap="butt" stroke-dasharray="78.54 235.62" transform="rotate(180 60 60)"/>
       </svg>
       <div class="ring-badge">
         <img src="{{$logo ? asset('uploads/'.$logo) : asset('assets/img/logo.png') }}" alt="">
@@ -137,15 +161,7 @@
     </div>
   </header>
 
-  <!-- Step ticks -->
-  <div class="flex items-center justify-between sm:justify-start sm:gap-8 mb-8 sm:mb-10 font-mono text-xs" id="stepper">
-    @foreach(['Personal','Academic','Placement','Review'] as $i => $label)
-      <div class="step-tick flex items-center gap-2" data-tick="{{ $i + 1 }}">
-        <span class="dot"></span>
-        <span class="hidden xs:inline sm:inline">{{ $label }}</span>
-      </div>
-    @endforeach
-  </div>
+  <div class="flex items-center justify-between sm:justify-start sm:gap-6 mb-8 sm:mb-10 font-mono text-xs overflow-x-auto" id="stepper"></div>
 
   <p class="font-mono text-xs mb-6" style="color:var(--muted)" id="stepCounter"></p>
 
@@ -163,8 +179,8 @@
   <form action="{{ route('siwes.store') }}" method="POST" id="siwesForm" novalidate>
     @csrf
 
-    <!-- STEP 1 — Personal Information -->
-    <section class="step-panel active" data-step="1">
+    <!-- STEP 1 — Personal Information (email verification happens inline, right here) -->
+    <section class="step-panel active" data-step="1" data-title="Personal">
       <div class="bg-[var(--surface)] rounded-2xl p-5 sm:p-8 shadow-sm border space-y-5" style="border-color:var(--line-2)">
         <div>
           <h2 class="font-display text-lg sm:text-xl font-semibold" style="color:var(--ink)">Personal information</h2>
@@ -202,9 +218,50 @@
           </div>
           <div>
             <label class="field-label">Email</label>
-            <input type="email" name="email" value="{{ old('email') }}" placeholder="you@example.com" required>
+            <input type="email" name="email" id="emailInput" value="{{ old('email') }}" placeholder="you@example.com" required>
             <p class="err-msg">Enter a valid email address.</p>
           </div>
+        </div>
+
+        <!-- Inline email verification -->
+        <div id="emailVerifyBox" class="rounded-xl border p-4 sm:p-5 space-y-4 overflow-hidden" style="border-color:var(--line-2); background:var(--paper)">
+          {{-- Seeded from the server (SiwesOtpController::isRecentlyVerified against old('email'))
+               so a reload after a validation error on step 2/3/4 doesn't force
+               re-verification, even if localStorage was empty/cleared. --}}
+          <input type="hidden" name="email_verified" id="emailVerifiedFlag" value="{{ $verifiedEmail ? '1' : '0' }}">
+
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-sm font-medium" style="color:var(--ink)">Verify this email</p>
+              <p class="text-xs mt-0.5" id="verifyHint" style="color:var(--muted)">We'll send a 6-digit code to confirm we can reach you here.</p>
+            </div>
+            <button type="button" id="sendOtpBtn" class="self-start sm:self-auto rounded-lg font-semibold btn-primary btn-sm">Send code</button>
+          </div>
+
+          <div id="otpSection" class="space-y-3 hidden">
+            <div class="otp-row" role="group" aria-label="6 digit verification code">
+              <input class="otp-box" id="otpBox1" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code">
+              <input class="otp-box" id="otpBox2" inputmode="numeric" pattern="[0-9]*" maxlength="1">
+              <input class="otp-box" id="otpBox3" inputmode="numeric" pattern="[0-9]*" maxlength="1">
+              <input class="otp-box" id="otpBox4" inputmode="numeric" pattern="[0-9]*" maxlength="1">
+              <input class="otp-box" id="otpBox5" inputmode="numeric" pattern="[0-9]*" maxlength="1">
+              <input class="otp-box" id="otpBox6" inputmode="numeric" pattern="[0-9]*" maxlength="1">
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <span id="otpStatus" class="pill-pending">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Waiting for code
+              </span>
+              <div class="flex items-center gap-3">
+                <button type="button" id="verifyOtpBtn" class="self-start rounded-lg font-semibold btn-primary btn-sm">Confirm code</button>
+                <button type="button" id="resendOtpBtn" class="text-xs font-mono font-semibold underline btn-link" style="width:auto; padding:0;">Resend code</button>
+              </div>
+            </div>
+          </div>
+
+          <p class="err-msg" id="otpErr">Enter the 6-digit code and confirm it before continuing.</p>
+          <p class="err-msg" id="emailVerifyErr">Verify your email before continuing to the next step.</p>
         </div>
 
         <div>
@@ -217,7 +274,7 @@
     </section>
 
     <!-- STEP 2 — Academic Information -->
-    <section class="step-panel" data-step="2">
+    <section class="step-panel" data-step="2" data-title="Academic">
       <div class="bg-[var(--surface)] rounded-2xl p-5 sm:p-8 shadow-sm border space-y-5" style="border-color:var(--line-2)">
         <div>
           <h2 class="font-display text-lg sm:text-xl font-semibold" style="color:var(--ink)">Academic information</h2>
@@ -277,7 +334,7 @@
     </section>
 
     <!-- STEP 3 — Placement Preference -->
-    <section class="step-panel" data-step="3">
+    <section class="step-panel" data-step="3" data-title="Placement">
       <div class="bg-[var(--surface)] rounded-2xl p-5 sm:p-8 shadow-sm border space-y-5" style="border-color:var(--line-2)">
         <div>
           <h2 class="font-display text-lg sm:text-xl font-semibold" style="color:var(--ink)">Placement preference</h2>
@@ -321,7 +378,7 @@
     </section>
 
    <!-- STEP 4 — Review & Payment -->
-    <section class="step-panel" data-step="4">
+    <section class="step-panel" data-step="4" data-title="Review">
       <div class="bg-[var(--surface)] rounded-2xl p-5 sm:p-8 shadow-sm border space-y-5" style="border-color:var(--line-2)">
         <div>
           <h2 class="font-display text-lg sm:text-xl font-semibold" style="color:var(--ink)">Review your application</h2>
@@ -380,11 +437,98 @@
 
 <script>
 (function(){
+  const OTP_SEND_URL   = "{{ \Illuminate\Support\Facades\Route::has('siwes.otp.send')   ? route('siwes.otp.send')   : '' }}";
+  const OTP_VERIFY_URL = "{{ \Illuminate\Support\Facades\Route::has('siwes.otp.verify') ? route('siwes.otp.verify') : '' }}";
+  // New: lets the page ask the server "is this email still verified?" — used
+  // as a fallback whenever localStorage doesn't already confirm it (private
+  // browsing, cleared storage, a different device/browser, or a typed email
+  // that differs from the one old('email') rendered with).
+  const OTP_STATUS_URL = "{{ \Illuminate\Support\Facades\Route::has('siwes.otp.status') ? route('siwes.otp.status') : '' }}";
+  const CSRF_TOKEN = "{{ csrf_token() }}";
+
+  // Server-side verified email for the current request, if any (from
+  // SiwesController@create checking SiwesOtpController::isRecentlyVerified
+  // against old('email')). This is what keeps verification intact across a
+  // failed submission — it does not depend on localStorage surviving.
+  const SERVER_VERIFIED_EMAIL = @json($verifiedEmail);
+
+  const STORAGE_KEY = 'teqhitch_siwes_application_v1';
+  const STORAGE_TTL_MS = 60 * 60 * 1000;
+
+  // Verified emails are tracked separately from the draft so a verification
+  // survives even after the draft itself expires or is cleared. This is now
+  // just an optimistic client-side cache — the server's OTP_STATUS_URL /
+  // SERVER_VERIFIED_EMAIL are the actual source of truth, and store() always
+  // re-checks server-side regardless of what's sent in email_verified.
+  const VERIFIED_EMAIL_KEY = 'teqhitch_siwes_verified_emails_v1';
+  const VERIFIED_EMAIL_TTL_MS = 24 * 60 * 60 * 1000; // hold verification for 24h per email
+
+  function getVerifiedEmailStore(){
+    try {
+      const raw = localStorage.getItem(VERIFIED_EMAIL_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (err) { return {}; }
+  }
+
+  function rememberVerifiedEmail(email){
+    if (!email) return;
+    try {
+      const store = getVerifiedEmailStore();
+      store[email.toLowerCase()] = Date.now();
+      localStorage.setItem(VERIFIED_EMAIL_KEY, JSON.stringify(store));
+    } catch (err) {
+      console.warn('SIWES form: could not save verified-email record.', err);
+    }
+  }
+
+  function forgetVerifiedEmail(email){
+    if (!email) return;
+    try {
+      const store = getVerifiedEmailStore();
+      delete store[email.toLowerCase()];
+      localStorage.setItem(VERIFIED_EMAIL_KEY, JSON.stringify(store));
+    } catch (err) {}
+  }
+
+  function isEmailRecentlyVerified(email){
+    if (!email) return false;
+    const store = getVerifiedEmailStore();
+    const ts = store[email.toLowerCase()];
+    if (!ts) return false;
+    if (Date.now() - ts > VERIFIED_EMAIL_TTL_MS) {
+      delete store[email.toLowerCase()];
+      try { localStorage.setItem(VERIFIED_EMAIL_KEY, JSON.stringify(store)); } catch (err) {}
+      return false;
+    }
+    return true;
+  }
+
+  // Ask the server directly whether `email` is currently verified. Used as
+  // a fallback when the local cache doesn't already say yes — e.g. right
+  // after a validation-error reload, or on a browser/device that never had
+  // the localStorage record in the first place.
+  async function checkServerVerification(email){
+    if (!email || !OTP_STATUS_URL) return false;
+    try {
+      const res = await fetch(OTP_STATUS_URL + '?email=' + encodeURIComponent(email), {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      return !!data.verified;
+    } catch (err) {
+      return false;
+    }
+  }
+
   const steps = Array.from(document.querySelectorAll('.step-panel'));
-  const ticks = Array.from(document.querySelectorAll('[data-tick]'));
-  const ringSegs = Array.from(document.querySelectorAll('.ring-seg'));
+  const stepLabels = steps.map(s => s.dataset.title);
+  const stepColors = ['--blue','--cyan','--teal','--leaf'];
+
+  const stepperEl = document.getElementById('stepper');
+  const ringSvg = document.getElementById('ringSvg');
   const stepCounter = document.getElementById('stepCounter');
-  const stepLabels = ['Personal information','Academic information','Placement preference','Review & payment'];
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
   const submitBtn = document.getElementById('submitBtn');
@@ -392,8 +536,48 @@
   const trackSelect = document.getElementById('trackSelect');
   const amountInput = document.getElementById('amountInput');
   const trackFeeLabel = document.getElementById('trackFeeLabel');
+  const emailInput = document.getElementById('emailInput');
+  const emailVerifiedFlag = document.getElementById('emailVerifiedFlag');
+  const verifyHint = document.getElementById('verifyHint');
+  const sendOtpBtn = document.getElementById('sendOtpBtn');
+  const otpSection = document.getElementById('otpSection');
+  const otpStatus = document.getElementById('otpStatus');
+  const otpErr = document.getElementById('otpErr');
+  const emailVerifyErr = document.getElementById('emailVerifyErr');
+  const emailVerifyBox = document.getElementById('emailVerifyBox');
+  const otpBoxes = Array.from({length:6}, (_, i) => document.getElementById('otpBox' + (i+1)));
+  const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+  const resendOtpBtn = document.getElementById('resendOtpBtn');
+
   const MIN_AMOUNT = 10000;
   let current = 1;
+  let otpSentForEmail = null;
+  let resendCooldownTimer = null;
+
+  stepLabels.forEach((label, i) => {
+    const n = i + 1;
+    const tick = document.createElement('div');
+    tick.className = 'step-tick flex items-center gap-2 shrink-0';
+    tick.dataset.tick = n;
+    tick.innerHTML = '<span class="dot"></span><span class="hidden xs:inline sm:inline">' + label + '</span>';
+    stepperEl.appendChild(tick);
+  });
+  const ticks = Array.from(document.querySelectorAll('[data-tick]'));
+
+  const R = 50, CIRC = 2 * Math.PI * R, GAP = 6;
+  const segLen = (CIRC / stepLabels.length) - GAP;
+  const ringSegs = stepLabels.map((_, i) => {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('class', 'ring-seg');
+    circle.setAttribute('data-seg', i + 1);
+    circle.setAttribute('cx', 60); circle.setAttribute('cy', 60); circle.setAttribute('r', R);
+    circle.setAttribute('stroke-width', 8);
+    circle.setAttribute('stroke-linecap', 'butt');
+    circle.setAttribute('stroke-dasharray', segLen + ' ' + (CIRC - segLen));
+    circle.setAttribute('transform', 'rotate(' + (-90 + i * (360 / stepLabels.length)) + ' 60 60)');
+    ringSvg.appendChild(circle);
+    return circle;
+  });
 
   function fieldsForStep(n){
     return steps[n-1].querySelectorAll('input, select, textarea');
@@ -411,16 +595,218 @@
   function updateAmountDefaults(){
     const price = selectedTrackPrice();
     trackFeeLabel.textContent = '₦' + price.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    // Only auto-fill if the user hasn't typed a custom amount yet
     if (!amountInput.dataset.touched) {
       amountInput.value = Math.max(price, MIN_AMOUNT);
     }
   }
 
+  function resetOtpBoxesUI(){
+    otpBoxes.forEach(b => { b.value=''; b.classList.remove('invalid'); });
+    otpErr.style.display = 'none';
+  }
+
+  function setOtpStatus(state, text){
+    otpStatus.className = state === 'verified' ? 'pill-ok' : 'pill-pending';
+    otpStatus.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      (state === 'verified'
+        ? '<path d="M20 6 9 17l-5-5"/>'
+        : '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>') +
+      '</svg>' + text;
+  }
+
+  function startResendCooldown(seconds){
+    let left = seconds;
+    resendOtpBtn.disabled = true;
+    if (resendCooldownTimer) clearInterval(resendCooldownTimer);
+    resendOtpBtn.textContent = 'Resend code (' + left + 's)';
+    resendCooldownTimer = setInterval(() => {
+      left -= 1;
+      if (left <= 0) {
+        clearInterval(resendCooldownTimer);
+        resendOtpBtn.disabled = false;
+        resendOtpBtn.textContent = 'Resend code';
+      } else {
+        resendOtpBtn.textContent = 'Resend code (' + left + 's)';
+      }
+    }, 1000);
+  }
+
+  function markVerifiedUI(email){
+    emailVerifiedFlag.value = '1';
+    otpSentForEmail = email;
+    otpSection.classList.remove('hidden');
+    emailVerifyErr.style.display = 'none';
+    verifyHint.textContent = email + ' is verified.';
+    setOtpStatus('verified', 'Email verified');
+    rememberVerifiedEmail(email); // sync server truth back into the local cache
+  }
+
+  function markUnverified(){
+    emailVerifiedFlag.value = '0';
+    otpSentForEmail = null;
+    setOtpStatus('pending', 'Waiting for code');
+  }
+
+  async function sendOtp(email, { silent } = {}){
+    if (!email) return;
+
+    // Already verified within the last 24h locally — skip sending a new code.
+    if (isEmailRecentlyVerified(email)) {
+      markVerifiedUI(email);
+      return;
+    }
+
+    // Local cache doesn't know, but the server might (e.g. cleared storage,
+    // another device). Check before bothering to send a fresh code.
+    if (await checkServerVerification(email)) {
+      markVerifiedUI(email);
+      return;
+    }
+
+    emailVerifyErr.style.display = 'none';
+    emailVerifiedFlag.value = '0';
+    resetOtpBoxesUI();
+    otpSection.classList.remove('hidden');
+    sendOtpBtn.disabled = true;
+    verifyHint.textContent = 'Code sending to ' + email + '…';
+    setOtpStatus('pending', 'Sending code…');
+
+    if (!OTP_SEND_URL) {
+      console.warn('SIWES OTP: no "siwes.otp.send" route configured on the server.');
+      setOtpStatus('pending', 'Waiting for code');
+      if (!silent) { otpErr.textContent = 'Verification isn\'t configured yet — contact the site admin.'; otpErr.style.display = 'block'; }
+      sendOtpBtn.disabled = false;
+      return;
+    }
+
+    try {
+      const res = await fetch(OTP_SEND_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN, 'Accept': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (!res.ok) throw new Error('send failed');
+      otpSentForEmail = email;
+      verifyHint.textContent = 'Code sent to ' + email + ' — enter it below.';
+      setOtpStatus('pending', 'Code sent — check your inbox');
+      startResendCooldown(30);
+      saveState();
+    } catch (err) {
+      verifyHint.textContent = "We'll send a 6-digit code to confirm we can reach you here.";
+      setOtpStatus('pending', 'Waiting for code');
+      otpErr.textContent = 'Couldn\'t send the code. Check your connection and try "Resend code".';
+      otpErr.style.display = 'block';
+    } finally {
+      sendOtpBtn.disabled = false;
+    }
+  }
+
+  async function verifyOtp(){
+    const email = emailInput.value.trim();
+    const code = otpBoxes.map(b => b.value).join('');
+    otpErr.style.display = 'none';
+    otpBoxes.forEach(b => b.classList.remove('invalid'));
+
+    if (code.length !== 6) {
+      otpErr.textContent = 'Enter all 6 digits of the code.';
+      otpErr.style.display = 'block';
+      otpBoxes.forEach(b => { if (!b.value) b.classList.add('invalid'); });
+      return false;
+    }
+
+    if (!OTP_VERIFY_URL) {
+      otpErr.textContent = 'Verification isn\'t configured yet — contact the site admin.';
+      otpErr.style.display = 'block';
+      return false;
+    }
+
+    verifyOtpBtn.disabled = true;
+    verifyOtpBtn.textContent = 'Confirming…';
+    try {
+      const res = await fetch(OTP_VERIFY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN, 'Accept': 'application/json' },
+        body: JSON.stringify({ email, code })
+      });
+      if (!res.ok) {
+        otpBoxes.forEach(b => b.classList.add('invalid'));
+        otpErr.textContent = 'That code doesn\'t match. Check it and try again, or resend.';
+        otpErr.style.display = 'block';
+        return false;
+      }
+      markVerifiedUI(email);
+      saveState();
+      return true;
+    } catch (err) {
+      otpErr.textContent = 'Couldn\'t reach the server. Try again.';
+      otpErr.style.display = 'block';
+      return false;
+    } finally {
+      verifyOtpBtn.disabled = false;
+      verifyOtpBtn.textContent = 'Confirm code';
+    }
+  }
+
+  otpBoxes.forEach((box, i) => {
+    box.addEventListener('input', () => {
+      box.value = box.value.replace(/[^0-9]/g, '').slice(0, 1);
+      box.classList.remove('invalid');
+      if (box.value && otpBoxes[i+1]) otpBoxes[i+1].focus();
+    });
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && otpBoxes[i-1]) otpBoxes[i-1].focus();
+    });
+    box.addEventListener('paste', (e) => {
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+      if (!text) return;
+      e.preventDefault();
+      text.slice(0, 6).split('').forEach((ch, idx) => { if (otpBoxes[idx]) otpBoxes[idx].value = ch; });
+      const next = otpBoxes[Math.min(text.length, 5)];
+      if (next) next.focus();
+    });
+  });
+
+  sendOtpBtn.addEventListener('click', () => {
+    emailInput.classList.remove('invalid');
+    const err = emailInput.closest('div')?.querySelector('.err-msg');
+    if (!emailInput.value.trim() || !emailInput.checkValidity()) {
+      emailInput.classList.add('invalid');
+      if (err) err.style.display = 'block';
+      emailInput.focus();
+      return;
+    }
+    sendOtp(emailInput.value.trim());
+  });
+  verifyOtpBtn.addEventListener('click', verifyOtp);
+  resendOtpBtn.addEventListener('click', () => {
+    // Manual resend should always send a fresh code, even if the email
+    // was recently verified (e.g. user wants to re-confirm).
+    const email = emailInput.value.trim();
+    forgetVerifiedEmail(email);
+    resetOtpBoxesUI();
+    markUnverified();
+    sendOtp(email);
+  });
+
+  emailInput.addEventListener('input', () => {
+    const val = emailInput.value.trim();
+
+    if (isEmailRecentlyVerified(val)) {
+      markVerifiedUI(val);
+      return;
+    }
+
+    if (emailVerifiedFlag.value === '1' || otpSentForEmail) {
+      otpSection.classList.add('hidden');
+      verifyHint.textContent = "We'll send a 6-digit code to confirm we can reach you here.";
+      markUnverified();
+    }
+  });
+
   function validateStep(n){
     let valid = true;
     fieldsForStep(n).forEach(el => {
+      if (el.id && el.id.startsWith('otpBox')) return;
       el.classList.remove('invalid');
       const err = el.closest('div')?.querySelector('.err-msg');
       if (err) err.style.display = 'none';
@@ -433,6 +819,18 @@
         }
       }
     });
+
+    if (n === 1) {
+      emailVerifyErr.style.display = 'none';
+      if (emailVerifiedFlag.value !== '1') {
+        valid = false;
+        emailVerifyErr.style.display = 'block';
+        if (!otpSection.classList.contains('hidden')) {
+          otpErr.textContent = 'Confirm the code sent to your email before continuing.';
+          otpErr.style.display = 'block';
+        }
+      }
+    }
 
     if (n === 2) {
       const start = steps[1].querySelector('[name=siwes_start_date]').value;
@@ -466,6 +864,7 @@
     ringSegs.forEach(seg => {
       const n = Number(seg.dataset.seg);
       seg.classList.toggle('lit', n <= current);
+      seg.style.stroke = n <= current ? 'var(' + stepColors[n-1] + ')' : 'var(--line)';
     });
     stepCounter.textContent = 'Step ' + current + ' of ' + steps.length + ' — ' + stepLabels[current-1];
   }
@@ -478,7 +877,7 @@
     const rows = [
       ['Full name', data.get('full_name')],
       ['Phone', data.get('phone')],
-      ['Email', data.get('email')],
+      ['Email', data.get('email') + (emailVerifiedFlag.value === '1' ? ' ✓ verified' : '')],
       ['Institution', data.get('institution')],
       ['Course', (data.get('course_of_study')||'') + ' — ' + (data.get('level')||'')],
       ['SIWES period', (data.get('siwes_start_date')||'—') + '  to  ' + (data.get('siwes_end_date')||'—')],
@@ -499,11 +898,17 @@
     submitBtn.classList.toggle('hidden', n !== steps.length);
     if (n === steps.length) renderReview();
     updateStepper();
+    saveState();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   nextBtn.addEventListener('click', () => {
-    if (!validateStep(current)) return;
+    if (!validateStep(current)) {
+      if (current === 1 && emailVerifiedFlag.value !== '1') {
+        emailVerifyBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
     current = Math.min(current + 1, steps.length);
     showStep(current);
   });
@@ -520,17 +925,159 @@
   });
 
   form.addEventListener('submit', (e) => {
+    const step1Valid = emailVerifiedFlag.value === '1';
     const step3Valid = validateStep(3);
     const step4Valid = validateStep(4);
-    if (!step3Valid || !step4Valid) {
+    if (!step1Valid || !step3Valid || !step4Valid) {
       e.preventDefault();
-      current = !step3Valid ? 3 : 4;
+      current = !step1Valid ? 1 : (!step3Valid ? 3 : 4);
       showStep(current);
+      return;
     }
+    // Only clear the local draft once client-side validation has passed —
+    // note this still fires optimistically before the server confirms the
+    // submission succeeded. If the server rejects it (e.g. other field
+    // errors, or store() finds the verification has since expired), this
+    // page will be re-rendered and SERVER_VERIFIED_EMAIL / the OTP status
+    // endpoint restore verification on load regardless of the cleared draft.
+    clearSavedState();
   });
 
-  showStep(1);
+  function collectableFields(){
+    return Array.from(form.querySelectorAll('input[name], select[name], textarea[name]'));
+  }
+
+  function saveState(){
+    try {
+      const values = {};
+      collectableFields().forEach(el => { values[el.name] = el.value; });
+      const state = {
+        savedAt: Date.now(),
+        step: current,
+        values,
+        emailVerified: emailVerifiedFlag.value === '1',
+        verifiedEmail: emailVerifiedFlag.value === '1' ? emailInput.value.trim() : null,
+        otpSectionOpen: !otpSection.classList.contains('hidden'),
+        amountTouched: !!amountInput.dataset.touched,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (err) {
+      console.warn('SIWES form: could not save local progress.', err);
+    }
+  }
+
+  function clearSavedState(){
+    try { localStorage.removeItem(STORAGE_KEY); } catch (err) {}
+  }
+
+  function loadState(){
+    let raw;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (err) { return null; }
+    if (!raw) return null;
+    try {
+      const state = JSON.parse(raw);
+      if (!state || !state.savedAt) return null;
+      if (Date.now() - state.savedAt > STORAGE_TTL_MS) {
+        clearSavedState();
+        return null;
+      }
+      return state;
+    } catch (err) {
+      clearSavedState();
+      return null;
+    }
+  }
+
+  function showRestoreToast(){
+    const toast = document.createElement('div');
+    toast.className = 'restore-toast';
+    toast.innerHTML = '<div class="restore-toast-inner">' +
+      '<span>We restored your in-progress application.</span>' +
+      '<button type="button" id="discardRestoreBtn">Start over</button>' +
+      '</div>';
+    document.body.appendChild(toast);
+    document.getElementById('discardRestoreBtn').addEventListener('click', () => {
+      clearSavedState();
+      window.location.reload();
+    });
+    setTimeout(() => toast.remove(), 8000);
+  }
+
+  // Resolve verification state for whatever email currently sits in the
+  // field, checking in order: local cache -> server-rendered
+  // SERVER_VERIFIED_EMAIL (from old('email')) -> a live status() call.
+  // Returns true if it ended up marking the UI verified.
+  async function resolveVerification(email){
+    if (!email) return false;
+
+    if (isEmailRecentlyVerified(email)) {
+      markVerifiedUI(email);
+      return true;
+    }
+
+    if (SERVER_VERIFIED_EMAIL && SERVER_VERIFIED_EMAIL.toLowerCase() === email.toLowerCase()) {
+      markVerifiedUI(email);
+      return true;
+    }
+
+    if (await checkServerVerification(email)) {
+      markVerifiedUI(email);
+      return true;
+    }
+
+    return false;
+  }
+
+  async function restoreState(){
+    const state = loadState();
+    if (!state) return false;
+
+    collectableFields().forEach(el => {
+      if (Object.prototype.hasOwnProperty.call(state.values, el.name)) {
+        el.value = state.values[el.name];
+      }
+    });
+
+    if (state.amountTouched) amountInput.dataset.touched = '1';
+
+    const enteredEmail = emailInput.value.trim();
+    const verified = await resolveVerification(enteredEmail);
+
+    if (!verified) {
+      if (state.otpSectionOpen && enteredEmail) {
+        emailVerifiedFlag.value = '0';
+        sendOtp(enteredEmail, { silent: true });
+      } else {
+        emailVerifiedFlag.value = '0';
+      }
+    }
+
+    current = Math.min(Math.max(parseInt(state.step, 10) || 1, 1), steps.length);
+    showStep(current);
+    showRestoreToast();
+    return true;
+  }
+
+  let saveTimer = null;
+  form.addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveState, 400);
+  });
+  form.addEventListener('change', saveState);
+
+  (async function init(){
+    const restored = await restoreState();
+    if (!restored) {
+      // No local draft (e.g. cleared, expired, or a fresh reload after a
+      // server-side validation error on a different browser/device). Still
+      // resolve verification against server truth for whatever email is
+      // pre-filled via old('email') before showing step 1.
+      await resolveVerification(emailInput.value.trim());
+      showStep(1);
+    }
+  })();
 })();
 </script>
+
 </body>
 </html>

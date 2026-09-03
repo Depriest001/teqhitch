@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 
 class Students extends Authenticatable implements MustVerifyEmail
@@ -25,6 +26,7 @@ class Students extends Authenticatable implements MustVerifyEmail
         'status',
         'source',
         'siwes_application_id',
+        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -43,7 +45,30 @@ class Students extends Authenticatable implements MustVerifyEmail
     
     public function enrollmentApplication()
     {
-        return $this->belongsTo(EnrollmentApplication::class);
+        return $this->hasOne(EnrollmentApplication::class, 'email', 'email')
+            ->where('status', 'approved')
+            ->latestOfMany();
+    }
+
+    public function getProgramNameAttribute(): ?string
+    {
+        return match ($this->source) {
+            'siwes'      => $this->siwesApplication?->track?->name,
+            'enrollment' => $this->enrollmentApplication?->course?->name,
+            default      => null, // manual — no data to show yet
+        };
+    }
+
+    public function getProgramFeeAttribute(): ?float
+    {
+        // SiwesTrack's fee column is named `price` (see the application
+        // form and StoreSiwesApplicationRequest/store()), not `fee` — this
+        // was the same silent-null-then-0 bug as $track->fee elsewhere.
+        return match ($this->source) {
+            'siwes'      => $this->siwesApplication?->track?->price,
+            'enrollment' => $this->enrollmentApplication?->course?->price, // adjust column name if different
+            default      => null,
+        };
     }
 
     /**
@@ -64,15 +89,16 @@ class Students extends Authenticatable implements MustVerifyEmail
      * Call this once payment is confirmed (e.g. from the webhook handler
      * or SiwesApplicationController@success), not from the public form.
      */
-    public static function createFromSiwesApplication(SiwesApplication $application): self
+    public static function createFromSiwesApplication(SiwesApplication $application, string $password): self
     {
-        return static::firstOrCreate(
+        $student = static::firstOrCreate(
             ['email' => $application->email],
             [
                 'student_id'           => static::nextStudentId(),
                 'full_name'            => $application->full_name,
                 'phone'                => $application->phone,
-                'password'             => Hash::make($application->phone),
+                'password'             => Hash::make($password),
+                'email_verified_at'    => now(),
                 'gender'               => $application->gender,
                 'address'              => $application->address,
                 'study_mode'           => $application->mode === 'physical' ? 'onsite' : 'online',
@@ -81,6 +107,18 @@ class Students extends Authenticatable implements MustVerifyEmail
                 'siwes_application_id' => $application->id,
             ]
         );
+
+        // firstOrCreate() only applies the second array when it actually
+        // creates a new row — if a Students row for this email already
+        // existed (a retry, or a regenerated account), it's returned as-is
+        // and email_verified_at above was silently ignored. Backfill it
+        // explicitly since the SIWES OTP step already proved this email is
+        // real by the time we get here.
+        if ($student->email_verified_at === null) {
+            $student->forceFill(['email_verified_at' => now()])->save();
+        }
+
+        return $student;
     }
 
     /**

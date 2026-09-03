@@ -34,6 +34,7 @@ class ActivityLogService
 
             ActivityLog::create([
                 'user_id'    => $user->id,
+                'user_type'  => get_class($user),
                 'action'     => $action,
                 'module'     => $module,
                 'details'    => $details,

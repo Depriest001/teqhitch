@@ -80,7 +80,9 @@
 
     <div class="rounded-xl p-5 space-y-4" style="background:rgba(56,189,248,.06); border:1px solid rgba(56,189,248,.25)">
       <div>
-        <p class="font-medium text-sm" style="color:var(--navy)">Your Student Portal Login</p>
+        <a href="{{ route('student.dashboard') }}" class="block w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--navy)">
+          Visit Dashboard
+        </a>
         <p class="text-xs text-slate-500 mt-0.5">Use these details to track your placement, view updates, and download documents.</p>
       </div>
 
@@ -94,7 +96,7 @@
         <div class="flex justify-between items-center bg-white rounded-lg border border-slate-200 px-3 py-2.5">
           <span class="font-mono text-xs uppercase text-slate-400">Password</span>
           <span class="flex items-center gap-2">
-            <span class="font-mono text-sm cred-value" id="pwValue" data-value="{{ $application->phone }}" style="color:var(--navy)">••••••••••</span>
+            <span class="font-mono text-sm cred-value" id="pwValue" data-value="{{ session('student_password') }}" style="color:var(--navy)">••••••••••</span>
             <button type="button" id="togglePw" class="reveal-btn text-xs font-medium" style="color:var(--sky)">Show</button>
           </span>
         </div>
@@ -106,9 +108,9 @@
         change it to something only you know as soon as possible.
       </p>
 
-      <a href="{{ route('login') }}" class="block w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--navy)">
+      <!-- <a href="{{ route('login') }}" class="block w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--navy)">
         Log In to Student Portal
-      </a>
+      </a> -->
     </div>
 
   </div>

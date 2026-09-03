@@ -3,56 +3,75 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * Thin wrapper around Strowallet's Virtual Bank Account API.
+ * Thin wrapper around Strowallet's Dynamic Virtual Account API.
  *
- * Docs: https://strowallet.readme.io/reference/create-virtual-bank-account
+ * Docs: https://strowallet.readme.io/reference/dynamic-virtual-acct
  *
- * NOTE: Strowallet's public docs confirm the request body but do not publish
- * a fixed response schema. This service normalises a few likely key names
- * (accountNumber/account_number, bankName/bank_name, etc). Log the raw
- * response the first time you call this in sandbox mode and adjust
- * extractAccountDetails() to match exactly what comes back for your account.
+ * Unlike the static/reusable virtual-bank-account endpoint, a dynamic
+ * account is scoped to a single amount and expires 30 minutes after
+ * creation — the right shape for "pay this exact placement fee", since
+ * the account itself enforces the amount rather than relying on the
+ * payer to type the right figure into a reusable account.
+ *
+ * NOTE: Strowallet's public docs confirm the request params but do not
+ * publish a fixed response schema. This service normalises a few likely
+ * key names (accountNumber/account_number, bankName/bank_name, etc). Log
+ * the raw response the first time you call this in sandbox mode and
+ * adjust extractAccountDetails() to match exactly what comes back for
+ * your account.
  */
 class StrowalletService
 {
-    protected string $baseUrl = 'https://strowallet.com/api/virtual-bank';
+    protected string $dynamicAccountUrl = 'https://strowallet.com/api/virtual-bank/dynamic-account/';
+
+    /** How long Strowallet says a dynamic account stays valid for. */
+    protected int $expiresInMinutes = 30;
 
     /**
-     * Create a dedicated virtual account a customer can pay the SIWES
-     * placement fee into.
+     * Create a one-time virtual account scoped to a specific amount —
+     * e.g. the SIWES placement fee the applicant chose to pay. The
+     * account expires automatically after ~30 minutes.
      *
-     * @param array{email:string,account_name:string,phone:string} $data
-     * @return array{raw: array, account_number: ?string, bank_name: ?string, account_name: ?string}
+     * @param array{email:string,customer_name:string,amount:int|float|string} $data
+     * @return array{raw: array, account_number: ?string, bank_name: ?string, account_name: ?string, amount: string, expires_in_minutes: int}
      */
-    public function createVirtualAccount(array $data): array
+    public function createDynamicVirtualAccount(array $data): array
     {
-        $bank = config('services.strowallet.bank') ?: 'default';
-        $endpoint = $bank === 'default'
-            ? "{$this->baseUrl}/new-customer/"
-            : "{$this->baseUrl}/{$bank}";
+        foreach (['email', 'customer_name', 'amount'] as $required) {
+            if (empty($data[$required])) {
+                throw new InvalidArgumentException("StrowalletService::createDynamicVirtualAccount requires '{$required}'.");
+            }
+        }
 
-        $response = Http::asForm()->post($endpoint, [
+        // Strowallet's docs list these as query params on the POST request
+        // (matching the pattern used elsewhere in their API), so they're
+        // sent as a query string rather than a form/JSON body.
+        $response = Http::post($this->dynamicAccountUrl, [
             'public_key'   => config('services.strowallet.public_key'),
             'email'        => $data['email'],
-            'account_name' => $data['account_name'],
-            'phone'        => $data['phone'],
-            'webhook_url'  => config('services.strowallet.webhook_url'),
+            'customerName' => $data['customer_name'],
+            'amount'       => (string) $data['amount'],
             'mode'         => config('services.strowallet.API_mode', 'sandbox'),
         ]);
 
         if ($response->failed()) {
             throw new RuntimeException(
-                'Strowallet virtual account request failed ('.$response->status().'): '.$response->body()
+                'Strowallet dynamic virtual account request failed ('.$response->status().'): '.$response->body()
             );
         }
 
         $body = $response->json() ?? [];
 
         return array_merge(
-            ['raw' => $body],
+            [
+                'raw' => $body,
+                'amount' => (string) $data['amount'],
+                'expires_in_minutes' => $this->expiresInMinutes,
+            ],
             $this->extractAccountDetails($body)
         );
     }
@@ -76,6 +95,7 @@ class StrowalletService
                 ?? null,
             'account_name' => $payload['accountName']
                 ?? $payload['account_name']
+                ?? $payload['customerName']
                 ?? null,
         ];
     }
